@@ -1,0 +1,5 @@
+/build/
+/.gradle/
+/core/build/
+/lwjgl3/build/
+/.idea/
