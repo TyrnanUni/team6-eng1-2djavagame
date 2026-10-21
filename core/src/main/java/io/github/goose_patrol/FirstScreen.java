@@ -63,7 +63,6 @@ public class FirstScreen extends ScreenAdapter {
         float x = Xcenter;
         float y = Ycenter + 150;
 
-        font.getData().setScale(2.0f);
         layout.setText(font, "GOOSE PATROL"); // layout.width helps us find the center of the text
         font.draw(batch,layout, (Xcenter - (layout.width/2)), y);
         y -= 100;
