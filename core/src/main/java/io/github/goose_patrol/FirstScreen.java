@@ -85,8 +85,5 @@ public class FirstScreen extends ScreenAdapter {
     @Override
     public void dispose() {
         super.dispose();
-        batch.dispose();
-        shapeRenderer.dispose();
-        font.dispose();
     }
 }
