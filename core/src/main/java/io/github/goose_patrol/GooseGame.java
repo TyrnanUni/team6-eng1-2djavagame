@@ -26,9 +26,10 @@ public class GooseGame extends Game {
         FreeTypeFontGenerator.FreeTypeFontParameter fontParam = new FreeTypeFontGenerator.FreeTypeFontParameter();
 
         fontParam.size = 24;                 // font size
-        fontParam.color = Color.WHITE;       // font colour
+        fontParam.color = Color.WHITE;       // font color
 
         font = generator.generateFont(fontParam);
+        generator.dispose();
 
         setScreen(new FirstScreen(this));
     }

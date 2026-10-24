@@ -47,7 +47,7 @@ public class FirstScreen extends ScreenAdapter {
             // when a key is pressed the next screen "GameScreen" is called.
             game.setScreen(new GameScreen(game));
             dispose();
-            return;
+            return; //stops rendering
         }
 
         ScreenUtils.clear(Color.BLACK);
@@ -57,27 +57,26 @@ public class FirstScreen extends ScreenAdapter {
         batch.begin();
 
         // gets pos of center of the screen
-        float Xcenter = viewport.getWorldWidth() / 2;
-        float Ycenter = viewport.getWorldHeight() / 2;
+        float XCentre = viewport.getWorldWidth() / 2;
+        float YCentre = viewport.getWorldHeight() / 2;
 
-        float x = Xcenter;
-        float y = Ycenter + 150;
+        float x = XCentre;
+        float y = YCentre + 150;
 
-        font.getData().setScale(2.0f);
         layout.setText(font, "GOOSE PATROL"); // layout.width helps us find the center of the text
-        font.draw(batch,layout, (Xcenter - (layout.width/2)), y);
+        font.draw(batch,layout, (XCentre - (layout.width/2)), y);
         y -= 100;
 
         layout.setText(font, "Controls:"); // layout.width helps us find the center of the text
-        font.draw(batch,layout, (Xcenter - (layout.width/2)), y);
+        font.draw(batch,layout, (XCentre - (layout.width/2)), y);
         y -= 50;
 
         layout.setText(font, "W, A, S, D / up, left, down, right");
-        font.draw(batch, layout, (Xcenter - (layout.width/2)), y);
+        font.draw(batch, layout, (XCentre - (layout.width/2)), y);
         y -= 50;
 
         layout.setText(font, "Press any key to continue...");
-        font.draw(batch, layout, (Xcenter - (layout.width/2)), y);
+        font.draw(batch, layout, (XCentre - (layout.width/2)), y);
 
         batch.end();
 
@@ -85,6 +84,6 @@ public class FirstScreen extends ScreenAdapter {
 
     @Override
     public void dispose() {
-        // Destroy screen's assets here.
+        super.dispose();
     }
 }
