@@ -6,7 +6,6 @@ import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.*;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -15,26 +14,23 @@ import com.badlogic.gdx.utils.viewport.Viewport;
  *  It flashes up at the start and waits for an input to continue to the next screen.
  *  - Also shows control scheme.
  **/
-public class FirstScreen extends ScreenAdapter {
-    private final GooseGame game;
+public class ControlScreen extends ScreenAdapter {
+    private final MainGame game;
     private final Batch batch;
-    private final ShapeRenderer shapeRenderer;
     private final BitmapFont font;
     private final Viewport viewport;
     private final GlyphLayout layout;
     private final Sprite controls;
 
+    public ControlScreen(MainGame game) {
 
-    public FirstScreen(GooseGame game) {
         this.game = game;
         batch = game.getBatch();
         font = game.getFont();
-        shapeRenderer = game.getShapeRenderer();
-
         layout = new GlyphLayout();
         viewport = new ScreenViewport();
         controls = new Sprite(new Texture("WASDimg.png"));
-        controls.scale(1);
+        controls.scale(1f);
     }
 
     @Override
@@ -50,7 +46,7 @@ public class FirstScreen extends ScreenAdapter {
     public void render(float delta) {
         // Screen drawn here. "delta" is the time since last render in seconds.
         // called over and over ~60 times per second
-        if (Gdx.input.isKeyJustPressed(Input.Keys.ANY_KEY)) {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
             // when a key is pressed the next screen "GameScreen" is called.
             game.setScreen(new GameScreen(game));
             dispose();
@@ -71,29 +67,39 @@ public class FirstScreen extends ScreenAdapter {
         float y = YCentre + 190;
 
         // Draws control scheme help on screen
-        // Spacing may need improving - lines like: y -= someX ,are the spacing
+        int lineSpacing = 35; // line spacing to make spacing easier to change
+
         layout.setText(font, "GOOSE PATROL"); // layout.width helps us find the center of the text
         font.draw(batch,layout, (XCentre - (layout.width/2)), y);
-        y -= 100;
+        y -= lineSpacing * 2;
 
-        layout.setText(font, "Controls:"); // layout.width helps us find the center of the text
+        layout.setText(font, "Controls:");
         font.draw(batch,layout, (XCentre - (layout.width/2)), y);
-        y -= 170;
+        y -= lineSpacing * 2;
+        layout.setText(font, "W - Up");
+        font.draw(batch,layout, XCentre + 80, y);
+        y -= lineSpacing;
+        layout.setText(font, "A - Left");
+        font.draw(batch,layout, XCentre + 80, y);
+        y -= lineSpacing;
+        layout.setText(font, "S - Down");
+        font.draw(batch,layout, XCentre + 80, y);
+        y -= lineSpacing;
+        layout.setText(font, "D - Right");
+        font.draw(batch,layout, XCentre + 80, y);
+        y -= lineSpacing;
+        layout.setText(font, "Q - Pause / Play");
+        font.draw(batch,layout, XCentre + 80, y);
+        y -= lineSpacing;
 
-        controls.setPosition(XCentre - controls.getWidth()/2, y);
+        controls.setPosition(XCentre - 150, YCentre - 80);
         controls.draw(batch);
-        y -= 80;
+        y -= lineSpacing * 2;
 
-        layout.setText(font, "Press any key to continue...");
+        layout.setText(font, "Press SPACE key to continue...");
         font.draw(batch, layout, (XCentre - (layout.width/2)), y);
 
         batch.end();
         // end of draw batch
-
-    }
-
-    @Override
-    public void dispose() {
-        super.dispose();
     }
 }
