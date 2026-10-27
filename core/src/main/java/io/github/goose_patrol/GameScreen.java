@@ -7,10 +7,8 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 /// not yet implemented fully///
@@ -21,7 +19,6 @@ public class GameScreen extends ScreenAdapter {
     // Assets + objects
     private final GooseGame game;
     private final Batch batch;
-    private final ShapeRenderer shapeRenderer;
     private final BitmapFont font;
     private final Viewport viewport;
     private final GlyphLayout layout = new GlyphLayout();
@@ -34,7 +31,6 @@ public class GameScreen extends ScreenAdapter {
         this.game = game;
         this.batch = game.getBatch();
         this.font = game.getFont();
-        this.shapeRenderer = game.getShapeRenderer();
         background = new TextureRegion(new Texture("Campus_Background.png"));
         viewportScaler = 70;
         viewport = new FitViewport(4 * viewportScaler, 3 * viewportScaler);
