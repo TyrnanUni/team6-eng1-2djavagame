@@ -2,72 +2,80 @@ package io.github.goose_patrol;
 
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 /// not yet implemented fully///
-
+/* Screen after controlScreen that contains the main game */
 public class GameScreen extends ScreenAdapter {
-    // main game screen loads after first screen
-
     // Assets + objects
-    private final GooseGame game;
     private final Batch batch;
     private final BitmapFont font;
-    private final Viewport viewport;
+    private final Viewport gameView;
+    private final OrthographicCamera camera;
     private final GlyphLayout layout = new GlyphLayout();
-    private final TextureRegion background;
+    private final Texture background;
+    private final Texture playerTexture;
+    private final Player player;
 
-    // Values
-    private final float viewportScaler; // scales the size of the viewport without affecting the resolution ratio
+    // Constants
+    private final float SCREEN_WIDTH = 1162f;
+    private final float SCREEN_HEIGHT = 650f;
 
-    public GameScreen(GooseGame game) {
-        this.game = game;
-        this.batch = game.getBatch();
-        this.font = game.getFont();
-        background = new TextureRegion(new Texture("Campus_Background.png"));
-        viewportScaler = 70;
-        viewport = new FitViewport(4 * viewportScaler, 3 * viewportScaler);
-        // FitViewport keeps the experience consistent for all aspect ratios but can introduce black bars
-        // if the window is resized.
-        // ^^^ this may be fixable if we can make the window only resizable from a corner? ? ?
+
+    // Constructor
+    public GameScreen(MainGame game) {
+        batch = game.getBatch();
+        font = game.getFont();
+        camera = new OrthographicCamera();
+
+        playerTexture = new Texture("Student_Forward.png");
+        background = new Texture("Campus_Background.png");
+
+        gameView = new FitViewport(SCREEN_WIDTH/3, SCREEN_HEIGHT/3, camera);
+
+        player = new Player(SCREEN_WIDTH/2 , SCREEN_HEIGHT/2, gameView, playerTexture);
     }
 
+    // called when window resized
     @Override
     public void resize(int width, int height) {
-        // If the window is minimized on a desktop (LWJGL3) platform, width and height are 0, which causes problems.
-        // In that case, we don't resize anything, and wait for the window to be a normal size before updating.
-        if(width <= 0 || height <= 0) return;
-
-        viewport.update(width, height, true);
-        // Resize your screen here. The parameters represent the new window size.
+        if(width <= 0 || height <= 0){
+            return;
+        }
+        gameView.update(width, height, false);
     }
 
+    // called when screen is set
+    @Override
+    public void show() {
+        player.reset(SCREEN_WIDTH/2, SCREEN_HEIGHT/2);
+    }
+
+    // loops while this is the active screen
     @Override
     public void render(float delta) {
-        // render logic, may need another class to handle the game logic itself.
-        // drawing done in GameScreen.draw() method bellow
-        viewport.apply();
-        batch.setProjectionMatrix(viewport.getCamera().combined);
         ScreenUtils.clear(Color.BLACK);
+
+        gameView.apply();
+        camera.position.set(player.getPlayerX() + player.getPlayerWidth()/2, player.getPlayerY() + player.getPlayerHeight()/2, 0);
+        batch.setProjectionMatrix(gameView.getCamera().combined);
+
         draw();
     }
 
+    // draws the things on the scene
     public void draw() {
-        // draws the things on scene that will always be there
-        // i.e. background, ui, hotbar? etc...
-        final float backgroundHeight = 739.0f;
-        final float backgroundWidth = 1162.0f;
-
         batch.begin();
 
-        batch.draw(background, 0, 0, backgroundWidth, backgroundHeight);
+        batch.draw(background, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+        player.draw(batch);
 
         batch.end();
     }
@@ -75,6 +83,6 @@ public class GameScreen extends ScreenAdapter {
     // make sure to dispose of screen unique items here
     @Override
     public void dispose() {
-        super.dispose();
+        background.dispose();
     }
 }

@@ -15,22 +15,22 @@ import com.badlogic.gdx.utils.viewport.Viewport;
  *  - Also shows control scheme.
  **/
 public class ControlScreen extends ScreenAdapter {
-    private final GooseGame game;
+    private final MainGame game;
     private final Batch batch;
     private final BitmapFont font;
     private final Viewport viewport;
     private final GlyphLayout layout;
     private final Sprite controls;
 
+    public ControlScreen(MainGame game) {
 
-    public ControlScreen(GooseGame game) {
         this.game = game;
         batch = game.getBatch();
         font = game.getFont();
         layout = new GlyphLayout();
         viewport = new ScreenViewport();
         controls = new Sprite(new Texture("WASDimg.png"));
-        controls.scale(1);
+        controls.scale(1f);
     }
 
     @Override
@@ -101,12 +101,5 @@ public class ControlScreen extends ScreenAdapter {
 
         batch.end();
         // end of draw batch
-
-    }
-
-
-    @Override
-    public void dispose() {
-        super.dispose();
     }
 }

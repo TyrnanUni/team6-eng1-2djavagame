@@ -12,7 +12,7 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
  *  This class runs first, it calls create() implicitly which sets current
  *  screen to ControlScreen.
  **/
-public class GooseGame extends Game {
+public class MainGame extends Game {
     private Batch batch;
     private BitmapFont font;
 
@@ -24,7 +24,7 @@ public class GooseGame extends Game {
         FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("BasicFont.ttf"));  // font file name
         FreeTypeFontGenerator.FreeTypeFontParameter fontParam = new FreeTypeFontGenerator.FreeTypeFontParameter();
 
-        fontParam.size = 24;                 // font size
+        fontParam.size = 33;                 // font size
         fontParam.color = Color.WHITE;       // font color
 
         font = generator.generateFont(fontParam); // takes params with ttf font to generate bitmap font
@@ -41,13 +41,8 @@ public class GooseGame extends Game {
         font.dispose();
     }
 
-
     // getters for class attributes - batch, shapeRenderer, font
-    public Batch getBatch() {
-        return batch;
-    }
+    public Batch getBatch() { return batch; }
 
-    public BitmapFont getFont() {
-        return font;
-    }
+    public BitmapFont getFont() { return font; }
 }
