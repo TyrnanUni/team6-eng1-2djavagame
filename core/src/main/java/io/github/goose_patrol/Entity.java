@@ -28,6 +28,7 @@ public abstract class Entity {
         batch.draw(texture, rect.x, rect.y, rect.width, rect.height);
     }
 
+
     abstract void update(float delta);
 
 }

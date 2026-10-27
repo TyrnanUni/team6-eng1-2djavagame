@@ -14,33 +14,25 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 /// not yet implemented fully///
 /* Screen after controlScreen that contains the main game */
 public class GameScreen extends ScreenAdapter {
-    // Assets + objects
-    private final Batch batch;
-    private final BitmapFont font;
-    private final Viewport gameView;
-    private final OrthographicCamera camera;
-    private final GlyphLayout layout = new GlyphLayout();
-    private final Texture background;
-    private final Texture playerTexture;
-    private final Player player;
-
     // Constants
     private final float SCREEN_WIDTH = 1162f;
     private final float SCREEN_HEIGHT = 650f;
+
+    // Assets + objects
+    private final Batch batch;
+    private final BitmapFont font;
+    private final OrthographicCamera camera = new OrthographicCamera();
+    private final Viewport gameView = new FitViewport(SCREEN_WIDTH/3, SCREEN_HEIGHT/3, camera);
+    private final GlyphLayout layout = new GlyphLayout();
+    private final Texture background = new Texture("Campus_Background.png");
+    private final Texture playerTexture = new Texture("Student_Forward.png");
+    private final Player player = new Player(SCREEN_WIDTH/2 , SCREEN_HEIGHT/2, gameView, playerTexture);
 
 
     // Constructor
     public GameScreen(MainGame game) {
         batch = game.getBatch();
         font = game.getFont();
-        camera = new OrthographicCamera();
-
-        playerTexture = new Texture("Student_Forward.png");
-        background = new Texture("Campus_Background.png");
-
-        gameView = new FitViewport(SCREEN_WIDTH/3, SCREEN_HEIGHT/3, camera);
-
-        player = new Player(SCREEN_WIDTH/2 , SCREEN_HEIGHT/2, gameView, playerTexture);
     }
 
     // called when window resized
@@ -63,11 +55,13 @@ public class GameScreen extends ScreenAdapter {
     public void render(float delta) {
         ScreenUtils.clear(Color.BLACK);
 
-        gameView.apply();
-        camera.position.set(player.getPlayerX() + player.getPlayerWidth()/2, player.getPlayerY() + player.getPlayerHeight()/2, 0);
+        player.update(delta);
+        camera.position.set(player.getX() + player.getWidth()/2, player.getY() + player.getHeight()/2, 0);
         batch.setProjectionMatrix(gameView.getCamera().combined);
+        gameView.apply();
 
         draw();
+
     }
 
     // draws the things on the scene
