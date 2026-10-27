@@ -4,29 +4,37 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.GlyphLayout;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
-/** First screen of the application. Displayed after the application is created. */
+/** First screen of the application. Displayed after the application is created.
+ *  It flashes up at the start and waits for an input to continue to the next screen.
+ *  - Also shows control scheme.
+ **/
 public class FirstScreen extends ScreenAdapter {
-    // this screen will flash up telling the user the control scheme
     private final GooseGame game;
     private final Batch batch;
     private final ShapeRenderer shapeRenderer;
     private final BitmapFont font;
-    private final Viewport viewport = new ScreenViewport();
-    private final GlyphLayout layout = new GlyphLayout();
+    private final Viewport viewport;
+    private final GlyphLayout layout;
+    private final Sprite controls;
+
 
     public FirstScreen(GooseGame game) {
         this.game = game;
-        this.batch = game.getBatch();
-        this.font = game.getFont();
-        this.shapeRenderer = game.getShapeRenderer();
+        batch = game.getBatch();
+        font = game.getFont();
+        shapeRenderer = game.getShapeRenderer();
+
+        layout = new GlyphLayout();
+        viewport = new ScreenViewport();
+        controls = new Sprite(new Texture("WASDimg.png"));
+        controls.scale(1);
     }
 
     @Override
@@ -36,7 +44,6 @@ public class FirstScreen extends ScreenAdapter {
         if(width <= 0 || height <= 0) return;
 
         viewport.update(width, height, true);
-        // Resize your screen here. The parameters represent the new window size.
     }
 
     @Override
@@ -50,35 +57,38 @@ public class FirstScreen extends ScreenAdapter {
             return; //stops rendering
         }
 
+        // clears screen and applies centred viewport
         ScreenUtils.clear(Color.BLACK);
         viewport.apply();
         batch.setProjectionMatrix(viewport.getCamera().combined);
 
+        // sends all draw instructions to GPU in a 'batch' - efficient
         batch.begin();
 
         // gets pos of center of the screen
         float XCentre = viewport.getWorldWidth() / 2;
         float YCentre = viewport.getWorldHeight() / 2;
+        float y = YCentre + 190;
 
-        float x = XCentre;
-        float y = YCentre + 150;
-
+        // Draws control scheme help on screen
+        // Spacing may need improving - lines like: y -= someX ,are the spacing
         layout.setText(font, "GOOSE PATROL"); // layout.width helps us find the center of the text
         font.draw(batch,layout, (XCentre - (layout.width/2)), y);
         y -= 100;
 
         layout.setText(font, "Controls:"); // layout.width helps us find the center of the text
         font.draw(batch,layout, (XCentre - (layout.width/2)), y);
-        y -= 50;
+        y -= 170;
 
-        layout.setText(font, "W, A, S, D / up, left, down, right");
-        font.draw(batch, layout, (XCentre - (layout.width/2)), y);
-        y -= 50;
+        controls.setPosition(XCentre - controls.getWidth()/2, y);
+        controls.draw(batch);
+        y -= 80;
 
         layout.setText(font, "Press any key to continue...");
         font.draw(batch, layout, (XCentre - (layout.width/2)), y);
 
         batch.end();
+        // end of draw batch
 
     }
 

@@ -9,9 +9,11 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
-/** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
+/** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms.
+ *  This class runs first, it calls create() implicitly which sets current
+ *  screen to FirstScreen.
+ **/
 public class GooseGame extends Game {
-    // Runs first and hands over to other Screens when "setScreen" called in create()
     private ShapeRenderer shapeRenderer;
     private Batch batch;
     private BitmapFont font;
@@ -22,13 +24,14 @@ public class GooseGame extends Game {
         batch = new SpriteBatch();
         shapeRenderer = new ShapeRenderer();
 
+        // creates a ttf to bitmap font generator
         FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("BasicFont.ttf"));  // font file name
         FreeTypeFontGenerator.FreeTypeFontParameter fontParam = new FreeTypeFontGenerator.FreeTypeFontParameter();
 
         fontParam.size = 24;                 // font size
         fontParam.color = Color.WHITE;       // font color
 
-        font = generator.generateFont(fontParam);
+        font = generator.generateFont(fontParam); // takes params with ttf font to generate bitmap font
         generator.dispose();
 
         setScreen(new FirstScreen(this));
