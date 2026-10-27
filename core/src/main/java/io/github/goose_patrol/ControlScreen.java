@@ -18,18 +18,16 @@ public class ControlScreen extends ScreenAdapter {
     private final MainGame game;
     private final Batch batch;
     private final BitmapFont font;
-    private final Viewport viewport;
-    private final GlyphLayout layout;
-    private final Sprite controls;
+    private final Viewport viewport = new ScreenViewport();
+    private final GlyphLayout layout = new GlyphLayout();
+    private final Sprite controls = new Sprite(new Texture("WASDimg.png"));
+
 
     public ControlScreen(MainGame game) {
-
         this.game = game;
         batch = game.getBatch();
         font = game.getFont();
-        layout = new GlyphLayout();
-        viewport = new ScreenViewport();
-        controls = new Sprite(new Texture("WASDimg.png"));
+
         controls.scale(1f);
     }
 

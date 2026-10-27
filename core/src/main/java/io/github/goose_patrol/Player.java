@@ -1,5 +1,7 @@
 package io.github.goose_patrol;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
@@ -11,9 +13,12 @@ public class Player extends Entity{
     // Constants - will be changed later but just some arbitrary values for now
     private static final float PLAYER_SCALE = 0.5f;
     private final float MAX_HEALTH = 100;
+    private final float RANGE = 70; // range past which enemies spawn as to be off screen
 
     // Values
+    private float speed = 1;
     private float health;
+
 
     // Constructor
     public Player(float x, float y, Viewport gameView, Texture texture) {
@@ -30,20 +35,36 @@ public class Player extends Entity{
 
     //
     @Override
-    void update(float delta) {
+    public void update(float delta) {
+        Input();
+    }
 
+    // checks for input and adjusts position on screen accordingly
+    public void Input() {
+        if (Gdx.input.isKeyPressed(Input.Keys.W)) {
+            rect.y += speed;
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.A)) {
+            rect.x -= speed;
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.S)) {
+            rect.y -= speed;
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.D)) {
+            rect.x += speed;
+        }
     }
 
     // getters
     public float getHealth() { return health ;}
 
-    public float getPlayerX() { return rect.x; }
+    public float getX() { return rect.x; }
 
-    public float getPlayerY() { return rect.y; }
+    public float getY() { return rect.y; }
 
-    public float getPlayerHeight() { return texture.getHeight() * PLAYER_SCALE; }
+    public float getHeight() { return texture.getHeight() * PLAYER_SCALE; }
 
-    public float getPlayerWidth() { return texture.getWidth() * PLAYER_SCALE; }
+    public float getWidth() { return texture.getWidth() * PLAYER_SCALE; }
 
 
 }
