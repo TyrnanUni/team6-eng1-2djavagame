@@ -10,10 +10,9 @@ public class Goose extends Entity{
     // Constants
     private static final float GOOSE_SCALE = 0.5f;
     private final float MAX_HEALTH = 100.0f;
-    private final float RANGE = 100.0f; // the smallest distance a goose can spawn away from player without being seen
+    private float SPEED = 90f;
 
     // Values
-    private float speed = 40f;
     private float health;
 
     // Objects
@@ -23,13 +22,11 @@ public class Goose extends Entity{
      * Creates a goose enemy. Player is needed as a param as the position and pathfinding relies on it because its centered around the player.
      * @param x bottom left x pos
      * @param y bottom left y pos
-     * @param w desired rect height
-     * @param h desired rect  width
      * @param texture enemy texture
      * @param player player object tied to the enemies
      */
-    public Goose(float x, float y, float w, float h, Texture texture, Player player) {
-        super(x, y, w, h, texture);
+    public Goose(float x, float y, Texture texture, Player player) {
+        super(x, y, texture.getWidth() * GOOSE_SCALE, texture.getHeight() * GOOSE_SCALE, texture);
         this.player = player;
     }
 
@@ -41,17 +38,22 @@ public class Goose extends Entity{
     void update(float delta) {
         float Xdiff = player.getX() - getX();
         float Ydiff = player.getY() - getY();
-        float sld = (float) Math.sqrt( (double)((Xdiff*Xdiff) + (Ydiff*Ydiff)) ); // straight line distance
+        float sld = (float) Math.sqrt((Xdiff*Xdiff) + (Ydiff*Ydiff)); // straight line distance
 
         // direction based on straight line distance, delta time needed to keep distance consistent across all frame rates
-        rect.x += speed * delta * (Xdiff/sld);
-        rect.y += speed * delta * (Ydiff/sld);
+        rect.x += SPEED * delta * (Xdiff/sld);
+        rect.y += SPEED * delta * (Ydiff/sld);
+
     }
 
-    public float getX() {
-        return rect.x;
-    }
-    public float getY() {
-        return rect.y;
-    }
+    // getters
+    public float getHealth() { return health ;}
+
+    public float getX() { return rect.x; }
+
+    public float getY() { return rect.y; }
+
+    public float getHeight() { return texture.getHeight() * GOOSE_SCALE; }
+
+    public float getWidth() { return texture.getWidth() * GOOSE_SCALE; }
 }

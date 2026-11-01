@@ -15,9 +15,10 @@ public class Player extends Entity{
     // Constants - will be changed later but just some arbitrary values for now
     private static final float PLAYER_SCALE = 0.5f;
     private final float MAX_HEALTH = 100.0f;
+    private float SPEED = 100f;
 
     // Values
-    private float speed = 100f;
+
     private float health;
 
     /**
@@ -59,16 +60,16 @@ public class Player extends Entity{
      */
     public void Input(float delta) {
         if (Gdx.input.isKeyPressed(Input.Keys.W)) {
-            rect.y += speed * delta;
+            rect.y += SPEED * delta;
         }
         if (Gdx.input.isKeyPressed(Input.Keys.A)) {
-            rect.x -= speed * delta;
+            rect.x -= SPEED * delta;
         }
         if (Gdx.input.isKeyPressed(Input.Keys.S)) {
-            rect.y -= speed * delta;
+            rect.y -= SPEED * delta;
         }
         if (Gdx.input.isKeyPressed(Input.Keys.D)) {
-            rect.x += speed * delta;
+            rect.x += SPEED * delta;
         }
     }
 
