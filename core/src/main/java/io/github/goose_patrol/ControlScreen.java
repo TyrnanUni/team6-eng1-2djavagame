@@ -26,7 +26,7 @@ public class ControlScreen extends ScreenAdapter {
     public ControlScreen(MainGame game) {
         this.game = game;
         batch = game.getBatch();
-        font = game.getFont();
+        font = GooseUtil.getFont(Color.WHITE, 33);
 
         controls.scale(1f);
     }
