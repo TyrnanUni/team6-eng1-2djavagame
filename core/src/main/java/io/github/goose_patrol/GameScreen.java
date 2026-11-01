@@ -55,12 +55,12 @@ public class GameScreen extends ScreenAdapter {
     public void render(float delta) {
         ScreenUtils.clear(Color.BLACK);
 
-        player.update(delta);
-        camera.position.set(player.getX() + player.getWidth()/2, player.getY() + player.getHeight()/2, 0);
+        player.update(delta); // updates player status - pos, health etc..
+        camera.position.set(player.getX() + player.getWidth()/2.0f, player.getY() + player.getHeight()/2.0f, 0.0f);
+        camera.update(); // updates camera which makes sure no mismatching happens between player and camera - stops jittering
         batch.setProjectionMatrix(gameView.getCamera().combined);
-        gameView.apply();
-
-        draw();
+        gameView.apply(); //reapply viewport
+        draw(); // all drawing done here
 
     }
 

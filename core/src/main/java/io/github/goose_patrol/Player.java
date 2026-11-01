@@ -12,11 +12,11 @@ public class Player extends Entity{
 
     // Constants - will be changed later but just some arbitrary values for now
     private static final float PLAYER_SCALE = 0.5f;
-    private final float MAX_HEALTH = 100;
-    private final float RANGE = 70; // range past which enemies spawn as to be off screen
+    private final float MAX_HEALTH = 100.0f;
+    private final float RANGE = 70.0f; // range past which enemies spawn as to be off-screen
 
     // Values
-    private float speed = 1;
+    private float speed = 150f;
     private float health;
 
 
@@ -36,22 +36,23 @@ public class Player extends Entity{
     //
     @Override
     public void update(float delta) {
-        Input();
+        Input(delta);
+        // needs to check if taking damage + collisions
     }
 
     // checks for input and adjusts position on screen accordingly
-    public void Input() {
+    public void Input(float delta) {
         if (Gdx.input.isKeyPressed(Input.Keys.W)) {
-            rect.y += speed;
+            rect.y += speed * delta;
         }
         if (Gdx.input.isKeyPressed(Input.Keys.A)) {
-            rect.x -= speed;
+            rect.x -= speed * delta;
         }
         if (Gdx.input.isKeyPressed(Input.Keys.S)) {
-            rect.y -= speed;
+            rect.y -= speed * delta;
         }
         if (Gdx.input.isKeyPressed(Input.Keys.D)) {
-            rect.x += speed;
+            rect.x += speed * delta;
         }
     }
 
