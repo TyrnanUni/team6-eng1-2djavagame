@@ -6,7 +6,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 
-// utility for use in other classes to help make it look cleaner and easier to read
+// utility for use in other classes to help make code look cleaner and easier to read
 public class GooseUtil {
 
     private static final float RANGE = 140f ; // minimum range from the player that geese can spawn

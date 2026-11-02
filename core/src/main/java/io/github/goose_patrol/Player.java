@@ -51,7 +51,6 @@ public class Player extends Entity{
     @Override
     public void update(float delta) {
         Input(delta);
-        // needs to check if taking damage + collisions
     }
 
     /**
@@ -84,5 +83,8 @@ public class Player extends Entity{
 
     public float getWidth() { return texture.getWidth() * PLAYER_SCALE; }
 
-
+    // setters
+    public void setHealth(float newHealth) {
+        health = newHealth;
+    }
 }

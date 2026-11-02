@@ -44,6 +44,10 @@ public class Goose extends Entity{
         rect.x += SPEED * delta * (Xdiff/sld);
         rect.y += SPEED * delta * (Ydiff/sld);
 
+        if (this.overlaps(player)) {
+            //  -- Do damage
+            // IMPLEMENT DAMAGE COOLDOWN IN PLAYER
+        }
     }
 
     // getters

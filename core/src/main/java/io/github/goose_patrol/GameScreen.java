@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.TimeUtils;
@@ -27,15 +28,18 @@ public class GameScreen extends ScreenAdapter {
     private final float SPAWNPERIOD = 3.5f;     // how long between each goose spawning
     private final int MAX_GEESE = 20;         // maximum number of geese that can be instantiated at once
 
-    // Assets + objects
+    //Assets
+    private final Texture playerTexture = new Texture("Student_Forward.png");
+    private final Texture gooseTexture = new Texture("Goose.png");
+    private final Texture background = new Texture("Campus_Background.png");
+
+    // Objects
     private final Batch batch;
     private final BitmapFont font;
     private final OrthographicCamera camera = new OrthographicCamera();
     private final Viewport gameView = new FitViewport(SCREEN_WIDTH/3, SCREEN_HEIGHT/3, camera);  // viewport locked on the player
     private final GlyphLayout layout = new GlyphLayout();     // used to help with text formatting on screen
-    private final Texture background = new Texture("Campus_Background.png");
-    private final Texture playerTexture = new Texture("Student_Forward.png");
-    private final Texture gooseTexture = new Texture("Goose.png");
+    private final ShapeRenderer shapeRenderer = new ShapeRenderer();
     public final Player player = new Player(SCREEN_WIDTH/2 , SCREEN_HEIGHT/2, gameView, playerTexture);
     public static Array<Goose> geese = new Array<>();
 
@@ -107,9 +111,11 @@ public class GameScreen extends ScreenAdapter {
 
     // draws the things on the scene
     public void draw() {
+        // gets position of centre of screen for ease of drawing
         float XCentre = Gdx.graphics.getWidth() / 2f;
         float YCentre = Gdx.graphics.getHeight() / 2f;
 
+        // formatting screen timer to string
         int minutesLeft = (int) timeLeft / 60;
         int secondsLeft = (int) timeLeft % 60;
         String minutesLeftStr;
@@ -120,18 +126,17 @@ public class GameScreen extends ScreenAdapter {
             if (minutesLeft == 0) {
                 minutesLeftStr = "0" + minutesLeftStr;
             }
-        }
-        else {
+        } else {
             minutesLeftStr = minutesLeft + "";
         }
+
         if (secondsLeft < 10) {
             secondsLeftStr = "0" + secondsLeft;
-        }
-        else {
+        } else {
             secondsLeftStr = secondsLeft + "";
         }
 
-        // game batch
+        // game batch - world
         gameView.apply(); //reapply viewport
         batch.begin();
         batch.draw(background, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -141,12 +146,20 @@ public class GameScreen extends ScreenAdapter {
         player.draw(batch);
         batch.end();
 
-        //UI batch
+        //UI batch - fixed on screen
         batch.getProjectionMatrix().setToOrtho2D(0, 0, gameView.getScreenWidth(), gameView.getScreenHeight());
 
-        batch.begin();
         layout.setText(font, minutesLeftStr + ":" + secondsLeftStr);
-        font.draw(batch, layout, XCentre - layout.width/2, gameView.getScreenHeight()- layout.height);
+
+        // do all UI shape rendering here
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        shapeRenderer.setColor(Color.WHITE);
+        shapeRenderer.rect(XCentre - layout.width/2f, gameView.getScreenHeight() - layout.height, layout.width + 25, layout.height);
+        shapeRenderer.end();
+
+        // all other rendering here
+        batch.begin();
+        font.draw(batch, layout, XCentre - layout.width/2, gameView.getScreenHeight());
         batch.end();
     }
 
