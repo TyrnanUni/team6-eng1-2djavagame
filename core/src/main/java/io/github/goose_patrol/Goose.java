@@ -1,6 +1,7 @@
 package io.github.goose_patrol;
 
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.math.Vector2;
 
 /**
  * A class expressing a Goose enemy and an object. Extends Entity abstract class.
@@ -17,6 +18,8 @@ public class Goose extends Entity{
 
     // Objects
     private Player player;
+    public Vector2 velocity = new Vector2(0,0);
+    public Vector2 push = new Vector2(0,0);
 
     /**
      * Creates a goose enemy. Player is needed as a param as the position and pathfinding relies on it because its centered around the player.
@@ -41,13 +44,42 @@ public class Goose extends Entity{
         float sld = (float) Math.sqrt((Xdiff*Xdiff) + (Ydiff*Ydiff)); // straight line distance
 
         // direction based on straight line distance, delta time needed to keep distance consistent across all frame rates
-        rect.x += SPEED * delta * (Xdiff/sld);
-        rect.y += SPEED * delta * (Ydiff/sld);
+        if (sld > 0) {
+            velocity.set(Xdiff/sld, Ydiff/sld);
+        } else {
+            velocity.set(0, 0);
+        }
+
+        // this just keeps the geese from packing to closely together, it offsets their velocity by the direction of the incoming geese.
+        push.set(0, 0);
+        Vector2 diff = new Vector2(0, 0);
+        for (int i = 0; i < GameScreen.geese.size; ++i) {
+            Goose other = GameScreen.geese.get(i);
+            if (this == other) continue;
+
+            if (this.overlaps(GameScreen.geese.get(i))) {
+                diff.set(this.velocity.x - other.velocity.x, this.velocity.y - other.velocity.y);
+                if (diff.isZero()) { diff.set(0, 1); }
+                else {
+                    diff.nor();
+                }
+            }
+            push.add(diff);
+        }
+
+        if (!push.isZero()) {
+            push.nor().scl(0.5f);
+        }
+        velocity.add(push);
 
         if (this.overlaps(player)) {
-            //  -- Do damage
-            // IMPLEMENT DAMAGE COOLDOWN IN PLAYER
+            // lose health , slow down ? ...
         }
+
+        rect.x += velocity.x * delta * SPEED;
+        rect.y += velocity.y * delta * SPEED;
+
+
     }
 
     // getters

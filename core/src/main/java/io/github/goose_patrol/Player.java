@@ -3,6 +3,7 @@ package io.github.goose_patrol;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 /**
@@ -15,11 +16,11 @@ public class Player extends Entity{
     // Constants - will be changed later but just some arbitrary values for now
     private static final float PLAYER_SCALE = 0.5f;
     private final float MAX_HEALTH = 100.0f;
-    private float SPEED = 100f;
+    private float SPEED = 115f;
 
     // Values
-
     private float health;
+    public static Vector2 velocity = new Vector2();
 
     /**
      * Constructor
@@ -58,18 +59,18 @@ public class Player extends Entity{
      * @param delta time since last render
      */
     public void Input(float delta) {
-        if (Gdx.input.isKeyPressed(Input.Keys.W)) {
-            rect.y += SPEED * delta;
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.A)) {
-            rect.x -= SPEED * delta;
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.S)) {
-            rect.y -= SPEED * delta;
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.D)) {
-            rect.x += SPEED * delta;
-        }
+        velocity.set(0, 0); // resets velocity so doesnt keep going after stopped pressing
+
+        if (Gdx.input.isKeyPressed(Input.Keys.W))  velocity.y += 1;
+        if (Gdx.input.isKeyPressed(Input.Keys.A))  velocity.x -= 1;
+        if (Gdx.input.isKeyPressed(Input.Keys.S))  velocity.y -= 1;
+        if (Gdx.input.isKeyPressed(Input.Keys.D))  velocity.x += 1;
+
+        if (!velocity.isZero()) velocity.nor();
+
+        rect.x += velocity.x * delta * SPEED;
+        rect.y += velocity.y * delta * SPEED;
+
     }
 
     // getters
