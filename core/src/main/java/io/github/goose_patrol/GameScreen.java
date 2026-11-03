@@ -1,17 +1,19 @@
 package io.github.goose_patrol;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
-import com.badlogic.gdx.utils.TimeUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
@@ -27,6 +29,9 @@ public class GameScreen extends ScreenAdapter {
     private final long GRACE = 5;             // time before geese can spawn
     private final float SPAWNPERIOD = 3.5f;     // how long between each goose spawning
     private final int MAX_GEESE = 20;         // maximum number of geese that can be instantiated at once
+    private final float BUTTON_W = 140f;      // pause button size (UI pixels)
+    private final float BUTTON_H = 50f;
+    private final float BUTTON_MARGIN = 15f;  // gap between pause button and screen corner
 
     //Assets
     private final Texture playerTexture = new Texture("Student_Forward.png");
@@ -36,23 +41,32 @@ public class GameScreen extends ScreenAdapter {
     // Objects
     private final Batch batch;
     private final BitmapFont font;
+    private final BitmapFont smallFont;       // black text for the pause button
+    private final BitmapFont overlayFont;     // white text for the pause overlay
     private final OrthographicCamera camera = new OrthographicCamera();
     private final Viewport gameView = new FitViewport(SCREEN_WIDTH/3, SCREEN_HEIGHT/3, camera);  // viewport locked on the player
     private final GlyphLayout layout = new GlyphLayout();     // used to help with text formatting on screen
     private final ShapeRenderer shapeRenderer = new ShapeRenderer();
+    private final Rectangle pauseButton = new Rectangle(); // on-screen pause/resume button, in UI pixels
     public final Player player = new Player(SCREEN_WIDTH/2 , SCREEN_HEIGHT/2, gameView, playerTexture);
     public static Array<Goose> geese = new Array<>();
 
     // Time keeping
-    public long START_T = TimeUtils.millis(); // game start time
-    public long elapsed_T;                    // get current time with TimeUtils.timeSinceMillis(START_T);
+    // time is counted with delta (not the wall clock) so it stops while the game is paused
+    private float playTime;                   // seconds of un-paused play so far
+    public long elapsed_T;                    // whole seconds of play so far
     private float spawnTimer;                 // time since last goose spawned
-    private float timeLeft;                   // time left until the game ends
+    private float timeLeft = MAX_TIME;        // time left until the game ends
+
+    // State
+    private boolean paused = false;           // true while the game is paused
 
     // Constructor
     public GameScreen(MainGame game) {
         batch = game.getBatch();
         font = GooseUtil.getFont(Color.BLACK, 100);
+        smallFont = GooseUtil.getFont(Color.BLACK, 32);
+        overlayFont = GooseUtil.getFont(Color.WHITE, 32);
     }
 
     // called when window resized
@@ -71,13 +85,45 @@ public class GameScreen extends ScreenAdapter {
         player.reset(SCREEN_WIDTH/2, SCREEN_HEIGHT/2);
     }
 
+    // called by libGDX when the window loses focus / is minimised - pause so the player doesn't lose time
+    @Override
+    public void pause() {
+        paused = true;
+    }
+
 
     // loops while this is the active screen
     @Override
     public void render(float delta) {
         ScreenUtils.clear(Color.BLACK);
-        elapsed_T = TimeUtils.timeSinceMillis(START_T) / 1000; // div 1000 to give seconds
-        timeLeft = MAX_TIME - elapsed_T;
+
+        // pause button sits in the top right corner of the game area
+        pauseButton.set(gameView.getScreenWidth() - BUTTON_W - BUTTON_MARGIN,
+                        gameView.getScreenHeight() - BUTTON_H - BUTTON_MARGIN,
+                        BUTTON_W, BUTTON_H);
+
+        // Esc or Q (as shown on the controls screen) or clicking the button toggles pause
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) || Gdx.input.isKeyJustPressed(Input.Keys.Q)
+                || pauseButtonClicked()) {
+            GamePause();
+        }
+
+        if (!paused) {
+            update(delta);
+        }
+
+        camera.position.set(player.getX() + player.getWidth()/2.0f, player.getY() + player.getHeight()/2.0f, 0.0f);
+        camera.update(); // updates camera which makes sure no mismatching happens between player and camera - stops jittering
+        batch.setProjectionMatrix(gameView.getCamera().combined);
+
+        draw(); // all drawing done here (still drawn while paused so the frozen game shows behind the overlay)
+    }
+
+    // all game logic that should freeze while paused
+    private void update(float delta) {
+        playTime += delta;
+        elapsed_T = (long) playTime;
+        timeLeft = MAX_TIME - playTime;
 
         // logic to spawn geese in every {SPAWNPERIOD} seconds
         // general idea is to have an Array of geese that spawn every however many seconds and are continually drawn unless 'dispersed'
@@ -102,22 +148,26 @@ public class GameScreen extends ScreenAdapter {
         }
 
         player.update(delta); // updates player status - pos, health etc..
-        camera.position.set(player.getX() + player.getWidth()/2.0f, player.getY() + player.getHeight()/2.0f, 0.0f);
-        camera.update(); // updates camera which makes sure no mismatching happens between player and camera - stops jittering
-        batch.setProjectionMatrix(gameView.getCamera().combined);
+    }
 
-        draw(); // all drawing done here
+    // true on the frame the left mouse button is clicked inside the pause button
+    private boolean pauseButtonClicked() {
+        if (!Gdx.input.justTouched()) return false;
+        // mouse y is measured from the top of the window, UI is drawn from the bottom of the game area
+        float mx = Gdx.input.getX() - gameView.getScreenX();
+        float my = Gdx.graphics.getHeight() - Gdx.input.getY() - gameView.getScreenY();
+        return pauseButton.contains(mx, my);
     }
 
     // draws the things on the scene
     public void draw() {
-        // gets position of centre of screen for ease of drawing
-        float XCentre = Gdx.graphics.getWidth() / 2f;
-        float YCentre = Gdx.graphics.getHeight() / 2f;
+        // gets position of centre of the game area for ease of drawing
+        float XCentre = gameView.getScreenWidth() / 2f;
+        float YCentre = gameView.getScreenHeight() / 2f;
 
         // formatting screen timer to string
-        int minutesLeft = (int) timeLeft / 60;
-        int secondsLeft = (int) timeLeft % 60;
+        int minutesLeft = (int) Math.ceil(timeLeft) / 60;
+        int secondsLeft = (int) Math.ceil(timeLeft) % 60;
         String timerStr = String.format("%d:%02d", minutesLeft, secondsLeft);
 
         // game batch - world
@@ -132,18 +182,40 @@ public class GameScreen extends ScreenAdapter {
 
         //UI batch - fixed on screen
         batch.getProjectionMatrix().setToOrtho2D(0, 0, gameView.getScreenWidth(), gameView.getScreenHeight());
+        shapeRenderer.setProjectionMatrix(batch.getProjectionMatrix());
 
         layout.setText(font, timerStr);
 
         // do all UI shape rendering here
+        Gdx.gl.glEnable(GL20.GL_BLEND); // lets the pause overlay be see-through
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        if (paused) {
+            shapeRenderer.setColor(0f, 0f, 0f, 0.6f); // darken the frozen game
+            shapeRenderer.rect(0, 0, gameView.getScreenWidth(), gameView.getScreenHeight());
+        }
         shapeRenderer.setColor(Color.WHITE);
         shapeRenderer.rect(XCentre - layout.width/2f, gameView.getScreenHeight() - layout.height, layout.width + 25, layout.height);
+        shapeRenderer.rect(pauseButton.x, pauseButton.y, pauseButton.width, pauseButton.height);
         shapeRenderer.end();
+        Gdx.gl.glDisable(GL20.GL_BLEND);
 
         // all other rendering here
         batch.begin();
         font.draw(batch, layout, XCentre - layout.width/2, gameView.getScreenHeight());
+
+        // pause button label
+        layout.setText(smallFont, paused ? "RESUME" : "PAUSE");
+        smallFont.draw(batch, layout,
+            pauseButton.x + (pauseButton.width - layout.width) / 2f,
+            pauseButton.y + (pauseButton.height + layout.height) / 2f);
+
+        // pause overlay text
+        if (paused) {
+            layout.setText(overlayFont, "PAUSED");
+            overlayFont.draw(batch, layout, XCentre - layout.width/2f, YCentre + layout.height);
+            layout.setText(overlayFont, "Press Esc / Q or click RESUME to continue");
+            overlayFont.draw(batch, layout, XCentre - layout.width/2f, YCentre - layout.height);
+        }
         batch.end();
     }
 
@@ -158,8 +230,8 @@ public class GameScreen extends ScreenAdapter {
 
     }
 
-    // will be called to pause the game - stops timer and game movement
+    // called to pause / unpause the game - stops timer and game movement while paused
     public void GamePause() {
-
+        paused = !paused;
     }
 }
