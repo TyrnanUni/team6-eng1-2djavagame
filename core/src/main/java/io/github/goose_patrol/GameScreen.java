@@ -118,23 +118,7 @@ public class GameScreen extends ScreenAdapter {
         // formatting screen timer to string
         int minutesLeft = (int) timeLeft / 60;
         int secondsLeft = (int) timeLeft % 60;
-        String minutesLeftStr;
-        String secondsLeftStr;
-
-        if (minutesLeft < 10) {
-            minutesLeftStr = "0" + minutesLeft;
-            if (minutesLeft == 0) {
-                minutesLeftStr = "0" + minutesLeftStr;
-            }
-        } else {
-            minutesLeftStr = minutesLeft + "";
-        }
-
-        if (secondsLeft < 10) {
-            secondsLeftStr = "0" + secondsLeft;
-        } else {
-            secondsLeftStr = secondsLeft + "";
-        }
+        String timerStr = String.format("%d:%02d", minutesLeft, secondsLeft);
 
         // game batch - world
         gameView.apply(); //reapply viewport
@@ -149,7 +133,7 @@ public class GameScreen extends ScreenAdapter {
         //UI batch - fixed on screen
         batch.getProjectionMatrix().setToOrtho2D(0, 0, gameView.getScreenWidth(), gameView.getScreenHeight());
 
-        layout.setText(font, minutesLeftStr + ":" + secondsLeftStr);
+        layout.setText(font, timerStr);
 
         // do all UI shape rendering here
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
