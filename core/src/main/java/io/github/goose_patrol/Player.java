@@ -59,10 +59,10 @@ public class Player extends Entity{
     public void Input(float delta) {
         velocity.set(0, 0); // resets velocity so doesn't keep going after stopped pressing
 
-        if (Gdx.input.isKeyPressed(Input.Keys.W))  velocity.y += 1;
-        if (Gdx.input.isKeyPressed(Input.Keys.A))  velocity.x -= 1;
-        if (Gdx.input.isKeyPressed(Input.Keys.S))  velocity.y -= 1;
-        if (Gdx.input.isKeyPressed(Input.Keys.D))  velocity.x += 1;
+        if (Gdx.input.isKeyPressed(Input.Keys.W) || Gdx.input.isKeyPressed(Input.Keys.UP))    velocity.y += 1;
+        if (Gdx.input.isKeyPressed(Input.Keys.A) || Gdx.input.isKeyPressed(Input.Keys.LEFT))  velocity.x -= 1;
+        if (Gdx.input.isKeyPressed(Input.Keys.S) || Gdx.input.isKeyPressed(Input.Keys.DOWN))  velocity.y -= 1;
+        if (Gdx.input.isKeyPressed(Input.Keys.D) || Gdx.input.isKeyPressed(Input.Keys.RIGHT)) velocity.x += 1;
 
         if (!velocity.isZero()) velocity.nor();
 
