@@ -11,18 +11,18 @@ public class Goose extends Entity{
     // Constants
     private static final float GOOSE_SCALE = 0.5f;
     private final float MAX_HEALTH = 100.0f;
-    private float SPEED = 90f;
+    private final float SPEED = 90f;
 
     // Values
     private float health;
 
     // Objects
-    private Player player;
+    private final Player player;
     public Vector2 velocity = new Vector2(0,0);
     public Vector2 push = new Vector2(0,0);
 
     /**
-     * Creates a goose enemy. Player is needed as a param as the position and pathfinding relies on it because its centered around the player.
+     * Creates a goose enemy. Player is needed as a param as the position and pathfinding relies on it because it's centered around the player.
      * @param x bottom left x pos
      * @param y bottom left y pos
      * @param texture enemy texture

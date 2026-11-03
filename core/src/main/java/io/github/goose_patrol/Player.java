@@ -10,13 +10,11 @@ import com.badlogic.gdx.utils.viewport.Viewport;
  * A class expressing a Player. Can be controlled by user input.
  */
 public class Player extends Entity{
-    // Assets + objects
-    private final Viewport gameView;
 
     // Constants - will be changed later but just some arbitrary values for now
     private static final float PLAYER_SCALE = 0.5f;
     private final float MAX_HEALTH = 100.0f;
-    private float SPEED = 115f;
+    private final float SPEED = 115f;
 
     // Values
     private float health;
@@ -32,7 +30,7 @@ public class Player extends Entity{
     public Player(float x, float y, Viewport gameView, Texture texture) {
         super(x, y, texture.getWidth() * PLAYER_SCALE, texture.getHeight() * PLAYER_SCALE, texture);
 
-        this.gameView = gameView;
+        // Assets + objects
     }
 
     /**
@@ -59,7 +57,7 @@ public class Player extends Entity{
      * @param delta time since last render
      */
     public void Input(float delta) {
-        velocity.set(0, 0); // resets velocity so doesnt keep going after stopped pressing
+        velocity.set(0, 0); // resets velocity so doesn't keep going after stopped pressing
 
         if (Gdx.input.isKeyPressed(Input.Keys.W))  velocity.y += 1;
         if (Gdx.input.isKeyPressed(Input.Keys.A))  velocity.x -= 1;
