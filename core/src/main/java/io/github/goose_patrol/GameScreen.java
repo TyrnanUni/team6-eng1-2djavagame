@@ -85,24 +85,24 @@ public class GameScreen extends ScreenAdapter {
         player.reset(SCREEN_WIDTH/2, SCREEN_HEIGHT/2);
     }
 
-    // called by libGDX when the window loses focus / is minimised - pause so the player doesn't lose time
+    // called by libGDX so when min or paused time stops
     @Override
     public void pause() {
         paused = true;
     }
 
 
-    // loops while this is the active screen
+    // loops while this active screen
     @Override
     public void render(float delta) {
         ScreenUtils.clear(Color.BLACK);
 
-        // pause button sits in the top right corner of the game area
+        // pause button sits in the top right corner of the screen
         pauseButton.set(gameView.getScreenWidth() - BUTTON_W - BUTTON_MARGIN,
                         gameView.getScreenHeight() - BUTTON_H - BUTTON_MARGIN,
                         BUTTON_W, BUTTON_H);
 
-        // Esc or Q (as shown on the controls screen) or clicking the button toggles pause
+        // toggle pause
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) || Gdx.input.isKeyJustPressed(Input.Keys.Q)
                 || pauseButtonClicked()) {
             GamePause();
@@ -116,7 +116,7 @@ public class GameScreen extends ScreenAdapter {
         camera.update(); // updates camera which makes sure no mismatching happens between player and camera - stops jittering
         batch.setProjectionMatrix(gameView.getCamera().combined);
 
-        draw(); // all drawing done here (still drawn while paused so the frozen game shows behind the overlay)
+        draw();
     }
 
     // all game logic that should freeze while paused
@@ -150,7 +150,7 @@ public class GameScreen extends ScreenAdapter {
         player.update(delta); // updates player status - pos, health etc..
     }
 
-    // true on the frame the left mouse button is clicked inside the pause button
+    // if true on frame game pause
     private boolean pauseButtonClicked() {
         if (!Gdx.input.justTouched()) return false;
         // mouse y is measured from the top of the window, UI is drawn from the bottom of the game area
@@ -165,13 +165,12 @@ public class GameScreen extends ScreenAdapter {
         float XCentre = gameView.getScreenWidth() / 2f;
         float YCentre = gameView.getScreenHeight() / 2f;
 
-        // formatting screen timer to string
+        // better time formating
         int minutesLeft = (int) Math.ceil(timeLeft) / 60;
         int secondsLeft = (int) Math.ceil(timeLeft) % 60;
         String timerStr = String.format("%d:%02d", minutesLeft, secondsLeft);
 
-        // game batch - world
-        gameView.apply(); //reapply viewport
+        gameView.apply();
         batch.begin();
         batch.draw(background, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
         for (Goose goose : geese) {
@@ -180,17 +179,15 @@ public class GameScreen extends ScreenAdapter {
         player.draw(batch);
         batch.end();
 
-        //UI batch - fixed on screen
         batch.getProjectionMatrix().setToOrtho2D(0, 0, gameView.getScreenWidth(), gameView.getScreenHeight());
         shapeRenderer.setProjectionMatrix(batch.getProjectionMatrix());
 
         layout.setText(font, timerStr);
 
-        // do all UI shape rendering here
-        Gdx.gl.glEnable(GL20.GL_BLEND); // lets the pause overlay be see-through
+        Gdx.gl.glEnable(GL20.GL_BLEND);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         if (paused) {
-            shapeRenderer.setColor(0f, 0f, 0f, 0.6f); // darken the frozen game
+            shapeRenderer.setColor(0f, 0f, 0f, 0.6f);
             shapeRenderer.rect(0, 0, gameView.getScreenWidth(), gameView.getScreenHeight());
         }
         shapeRenderer.setColor(Color.WHITE);
@@ -199,7 +196,7 @@ public class GameScreen extends ScreenAdapter {
         shapeRenderer.end();
         Gdx.gl.glDisable(GL20.GL_BLEND);
 
-        // all other rendering here
+        // all rest of rendering here
         batch.begin();
         font.draw(batch, layout, XCentre - layout.width/2, gameView.getScreenHeight());
 

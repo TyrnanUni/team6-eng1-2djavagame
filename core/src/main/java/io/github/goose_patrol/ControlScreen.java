@@ -59,7 +59,7 @@ public class ControlScreen extends ScreenAdapter {
         // sends all draw instructions to GPU in a 'batch' - efficient
         batch.begin();
 
-        // gets pos of center of the screen
+        // gets pos of centre of the screen
         float XCentre = viewport.getWorldWidth() / 2;
         float YCentre = viewport.getWorldHeight() / 2;
         float y = YCentre + 190;
