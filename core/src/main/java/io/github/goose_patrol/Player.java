@@ -3,6 +3,7 @@ package io.github.goose_patrol;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
@@ -69,6 +70,14 @@ public class Player extends Entity{
         rect.x += velocity.x * delta * SPEED;
         rect.y += velocity.y * delta * SPEED;
 
+    }
+
+    /**
+     * Stops player leaving the map - edges act as walls.
+     */
+    public void keepInside(float mapWidth, float mapHeight) {
+        rect.x = MathUtils.clamp(rect.x, 0, mapWidth - rect.width);
+        rect.y = MathUtils.clamp(rect.y, 0, mapHeight - rect.height);
     }
 
     // getters

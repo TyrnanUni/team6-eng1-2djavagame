@@ -59,7 +59,7 @@ public class GameScreen extends ScreenAdapter {
     private float timeLeft = MAX_TIME;        // time left until the game ends
 
     // State
-    private boolean paused = false;           // true while the game is paused
+    private boolean paused = true;            // true while paused - game starts paused
 
     // Constructor
     public GameScreen(MainGame game) {
@@ -148,6 +148,7 @@ public class GameScreen extends ScreenAdapter {
         }
 
         player.update(delta); // updates player status - pos, health etc..
+        player.keepInside(SCREEN_WIDTH, SCREEN_HEIGHT); // map edges act as walls
     }
 
     // if true on frame game pause
