@@ -166,7 +166,7 @@ public class GameScreen extends ScreenAdapter {
         float XCentre = gameView.getScreenWidth() / 2f;
         float YCentre = gameView.getScreenHeight() / 2f;
 
-        // better time formating
+        // time formating
         int minutesLeft = (int) Math.ceil(timeLeft) / 60;
         int secondsLeft = (int) Math.ceil(timeLeft) % 60;
         String timerStr = String.format("%d:%02d", minutesLeft, secondsLeft);
