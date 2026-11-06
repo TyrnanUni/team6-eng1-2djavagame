@@ -19,7 +19,7 @@ public class Player extends Entity{
 
     // Values
     private float health;
-    public static Vector2 velocity = new Vector2();
+    public Vector2 velocity = new Vector2();
 
     /**
      * Constructor

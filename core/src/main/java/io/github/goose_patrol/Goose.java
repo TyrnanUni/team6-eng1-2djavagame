@@ -44,6 +44,7 @@ public class Goose extends Entity{
         float sld = (float) Math.sqrt((Xdiff*Xdiff) + (Ydiff*Ydiff)); // straight line distance
 
         // direction based on straight line distance, delta time needed to keep distance consistent across all frame rates
+        // used sld to normalise velocity
         if (sld > 0) {
             velocity.set(Xdiff/sld, Ydiff/sld);
         } else {

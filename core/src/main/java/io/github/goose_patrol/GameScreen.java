@@ -119,16 +119,19 @@ public class GameScreen extends ScreenAdapter {
         draw();
     }
 
-    // all game logic that should freeze while paused
+    // contains:
+    // player.update()    goose.update()    playTime += delta
+    // Called while not paused - stops gameplay effectively
     private void update(float delta) {
         playTime += delta;
         elapsed_T = (long) playTime;
         timeLeft = MAX_TIME - playTime;
 
-        // logic to spawn geese in every {SPAWNPERIOD} seconds
-        // general idea is to have an Array of geese that spawn every however many seconds and are continually drawn unless 'dispersed'
+        // spawn geese in every {SPAWNPERIOD} seconds
+        // continually drawn unless 'dispersed'
         spawnTimer += delta;
         if (elapsed_T >= GRACE) {
+            // gets random spawn-point for each new goose
             float x = GooseUtil.getEnemySpawnX(player);
             float y = GooseUtil.getEnemySpawnY(player);
 
@@ -138,8 +141,18 @@ public class GameScreen extends ScreenAdapter {
             }
         }
 
-        for (Goose goose : geese) {
+        // iterates through geese and removes the geese with <= 0 health
+        Array<Integer> removeList = new Array<>();
+        for (int i = 0; i < geese.size; ++i) {
+            Goose goose = geese.get(i);
             goose.update(delta);
+            if (goose.getHealth() <= 0.0f) {
+                removeList.add(i);
+            }
+        }
+        for (int index : removeList) {
+            // may be changed to call a way of getting rid of the geese without them just disappearing
+            geese.removeIndex(index);
         }
 
         // game ends when timeLeft hits 0
@@ -185,7 +198,7 @@ public class GameScreen extends ScreenAdapter {
 
         layout.setText(font, timerStr);
 
-        Gdx.gl.glEnable(GL20.GL_BLEND);
+        Gdx.gl.glEnable(GL20.GL_BLEND);     // allows the use of alpha values - allows use of transparent shapes
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         if (paused) {
             shapeRenderer.setColor(0f, 0f, 0f, 0.6f);
