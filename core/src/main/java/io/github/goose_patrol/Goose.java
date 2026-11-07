@@ -31,6 +31,7 @@ public class Goose extends Entity{
     public Goose(float x, float y, Texture texture, Player player) {
         super(x, y, texture.getWidth() * GOOSE_SCALE, texture.getHeight() * GOOSE_SCALE, texture);
         this.player = player;
+        health = MAX_HEALTH;
     }
 
     /**

@@ -143,16 +143,17 @@ public class GameScreen extends ScreenAdapter {
 
         // iterates through geese and removes the geese with <= 0 health
         Array<Integer> removeList = new Array<>();
-        for (int i = 0; i < geese.size; ++i) {
-            Goose goose = geese.get(i);
-            goose.update(delta);
+        int indx = 0;
+        for (Goose goose : geese) {
             if (goose.getHealth() <= 0.0f) {
-                removeList.add(i);
+                removeList.add(indx);
             }
+            goose.update(delta);
+            ++ indx;
         }
-        for (int index : removeList) {
+        for (int goose : removeList) {
             // may be changed to call a way of getting rid of the geese without them just disappearing
-            geese.removeIndex(index);
+            geese.removeIndex(goose);
         }
 
         // game ends when timeLeft hits 0
