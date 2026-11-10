@@ -29,6 +29,7 @@ public class GameScreen extends ScreenAdapter {
     private final long GRACE = 5;             // time before geese can spawn
     private final float SPAWNPERIOD = 3.5f;     // how long between each goose spawning
     private final int MAX_GEESE = 20;         // maximum number of geese that can be instantiated at once
+    private final int MAX_HITS = 5;
     private final float BUTTON_W = 140f;      // pause button size (UI pixels)
     private final float BUTTON_H = 50f;
     private final float BUTTON_MARGIN = 15f;  // gap between pause button and screen corner
@@ -39,6 +40,7 @@ public class GameScreen extends ScreenAdapter {
     private final Texture background = new Texture("Campus_Background.png");
 
     // Objects
+    private final MainGame game;
     private final Batch batch;
     private final BitmapFont font;
     private final BitmapFont smallFont;       // black text for the pause button
@@ -52,17 +54,20 @@ public class GameScreen extends ScreenAdapter {
     public static Array<Goose> geese = new Array<>();
 
     // Time keeping
-    // time is counted with delta (not the wall clock) so it stops while the game is paused
+    // time is now counted with delta so it stops while the game is paused - might be some issues with keeping time on less powerfull machines
     private float playTime;                   // seconds of un-paused play so far
     public long elapsed_T;                    // whole seconds of play so far
     private float spawnTimer;                 // time since last goose spawned
     private float timeLeft = MAX_TIME;        // time left until the game ends
 
     // State
-    private boolean paused = true;            // true while paused - game starts paused
+    private boolean paused = true;            // true while paused - game now starts paused
+    private boolean gameOver;
+    private boolean won;
 
     // Constructor
     public GameScreen(MainGame game) {
+        this.game = game;
         batch = game.getBatch();
         font = GooseUtil.getFont(Color.BLACK, 100);
         smallFont = GooseUtil.getFont(Color.BLACK, 32);
@@ -83,6 +88,7 @@ public class GameScreen extends ScreenAdapter {
     @Override
     public void show() {
         player.reset(SCREEN_WIDTH/2, SCREEN_HEIGHT/2);
+        geese.clear();
     }
 
     // called by libGDX so when min or paused time stops
@@ -102,13 +108,20 @@ public class GameScreen extends ScreenAdapter {
                         gameView.getScreenHeight() - BUTTON_H - BUTTON_MARGIN,
                         BUTTON_W, BUTTON_H);
 
+        if (gameOver) {
+            if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {
+                game.setScreen(new GameScreen(game));
+                dispose();
+                return;
+            }
+        }
         // toggle pause
-        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) || Gdx.input.isKeyJustPressed(Input.Keys.Q)
+        else if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) || Gdx.input.isKeyJustPressed(Input.Keys.Q)
                 || pauseButtonClicked()) {
             GamePause();
         }
 
-        if (!paused) {
+        if (!paused && !gameOver) {
             update(delta);
         }
 
@@ -135,7 +148,8 @@ public class GameScreen extends ScreenAdapter {
             float x = GooseUtil.getEnemySpawnX(player);
             float y = GooseUtil.getEnemySpawnY(player);
 
-            if (spawnTimer >= SPAWNPERIOD && geese.size <= MAX_GEESE) {
+            // stops at 20 geese to align with group docs (if statement runs before another goose added so prevents an extra goose spawning)
+            if (spawnTimer >= SPAWNPERIOD && geese.size < MAX_GEESE) {
                 geese.add(new Goose(x, y, gooseTexture, player));
                 spawnTimer = 0;
             }
@@ -156,13 +170,15 @@ public class GameScreen extends ScreenAdapter {
             geese.removeIndex(goose);
         }
 
-        // game ends when timeLeft hits 0
-        if (timeLeft <= 0) {
-            GameOver();
-        }
-
-        player.update(delta); // updates player status - pos, health etc..
+        player.update(delta); // updates player status - pos, hit cooldown etc..
         player.keepInside(SCREEN_WIDTH, SCREEN_HEIGHT); // map edges act as walls
+
+        if (player.getHits() >= MAX_HITS) {
+            GameOver(false);
+        } else if (timeLeft <= 0) {
+            timeLeft = 0;
+            GameOver(true);
+        }
     }
 
     // if true on frame game pause
@@ -197,17 +213,22 @@ public class GameScreen extends ScreenAdapter {
         batch.getProjectionMatrix().setToOrtho2D(0, 0, gameView.getScreenWidth(), gameView.getScreenHeight());
         shapeRenderer.setProjectionMatrix(batch.getProjectionMatrix());
 
+        String hitsStr = "Hits: " + player.getHits() + " / " + MAX_HITS;
+
         layout.setText(font, timerStr);
 
         Gdx.gl.glEnable(GL20.GL_BLEND);     // allows the use of alpha values - allows use of transparent shapes
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        if (paused) {
+        if (paused || gameOver) {
             shapeRenderer.setColor(0f, 0f, 0f, 0.6f);
             shapeRenderer.rect(0, 0, gameView.getScreenWidth(), gameView.getScreenHeight());
         }
         shapeRenderer.setColor(Color.WHITE);
         shapeRenderer.rect(XCentre - layout.width/2f, gameView.getScreenHeight() - layout.height, layout.width + 25, layout.height);
-        shapeRenderer.rect(pauseButton.x, pauseButton.y, pauseButton.width, pauseButton.height);
+        if (!gameOver) {
+            shapeRenderer.rect(pauseButton.x, pauseButton.y, pauseButton.width, pauseButton.height);
+        }
+        shapeRenderer.rect(BUTTON_MARGIN, pauseButton.y, BUTTON_W + 40, BUTTON_H);
         shapeRenderer.end();
         Gdx.gl.glDisable(GL20.GL_BLEND);
 
@@ -216,13 +237,41 @@ public class GameScreen extends ScreenAdapter {
         font.draw(batch, layout, XCentre - layout.width/2, gameView.getScreenHeight());
 
         // pause button label
-        layout.setText(smallFont, paused ? "RESUME" : "PAUSE");
-        smallFont.draw(batch, layout,
-            pauseButton.x + (pauseButton.width - layout.width) / 2f,
-            pauseButton.y + (pauseButton.height + layout.height) / 2f);
+        if (!gameOver) {
+            if (paused) {
+                layout.setText(smallFont, "RESUME");
+            } else {
+                layout.setText(smallFont, "PAUSE");
+            }
+            smallFont.draw(batch, layout,
+                pauseButton.x + (pauseButton.width - layout.width) / 2f,
+                pauseButton.y + (pauseButton.height + layout.height) / 2f);
+        }
 
+        layout.setText(smallFont, hitsStr);
+        smallFont.draw(batch, layout,
+            BUTTON_MARGIN + (BUTTON_W + 40 - layout.width) / 2f,
+            pauseButton.y + (BUTTON_H + layout.height) / 2f);
+
+        if (gameOver) {
+            String title;
+            String message;
+            if (won) {
+                title = "YOU WIN!";
+                message = "You survived the geese";
+            } else {
+                title = "GAME OVER";
+                message = "The geese caught you " + MAX_HITS + " times";
+            }
+            layout.setText(overlayFont, title);
+            overlayFont.draw(batch, layout, XCentre - layout.width/2f, YCentre + layout.height * 2);
+            layout.setText(overlayFont, message);
+            overlayFont.draw(batch, layout, XCentre - layout.width/2f, YCentre);
+            layout.setText(overlayFont, "Press R to play again");
+            overlayFont.draw(batch, layout, XCentre - layout.width/2f, YCentre - layout.height * 2);
+        }
         // pause overlay text
-        if (paused) {
+        else if (paused) {
             layout.setText(overlayFont, "PAUSED");
             overlayFont.draw(batch, layout, XCentre - layout.width/2f, YCentre + layout.height);
             layout.setText(overlayFont, "Press Esc / Q or click RESUME to continue");
@@ -235,11 +284,18 @@ public class GameScreen extends ScreenAdapter {
     @Override
     public void dispose() {
         background.dispose();
+        playerTexture.dispose();
+        gooseTexture.dispose();
+        font.dispose();
+        smallFont.dispose();
+        overlayFont.dispose();
+        shapeRenderer.dispose();
     }
 
     // will be called when game ends - allows retry
-    public void GameOver() {
-
+    public void GameOver(boolean playerWon) {
+        gameOver = true;
+        won = playerWon;
     }
 
     // called to pause / unpause the game - stops timer and game movement while paused

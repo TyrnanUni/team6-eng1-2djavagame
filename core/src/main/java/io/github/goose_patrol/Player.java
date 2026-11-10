@@ -14,12 +14,18 @@ public class Player extends Entity{
 
     // Constants - will be changed later but just some arbitrary values for now
     private static final float PLAYER_SCALE = 0.5f;
-    private final float MAX_HEALTH = 100.0f;
     private final float SPEED = 115f;
+    private final float HIT_COOLDOWN = 1.5f;
 
     // Values
+<<<<<<< HEAD
     private float health;
     public Vector2 velocity = new Vector2();
+=======
+    private int hits;
+    private float hitTimer;
+    public static Vector2 velocity = new Vector2();
+>>>>>>> 6c902ce (comment fix i think (my version and github out of sync for some reason)
 
     /**
      * Constructor
@@ -41,16 +47,27 @@ public class Player extends Entity{
      */
     public void reset(float x, float y) {
         rect.setPosition(x, y);
-        health = MAX_HEALTH;
+        hits = 0;
+        hitTimer = 0;
     }
 
     /**
-     * Updates status' of player. Input, health etc...
+     * Updates status' of player. Input, hit cooldown etc...
      * @param delta time since last render
      */
     @Override
     public void update(float delta) {
         Input(delta);
+        if (hitTimer > 0) {
+            hitTimer -= delta;
+        }
+    }
+
+    public void hit() {
+        if (hitTimer <= 0) {
+            hits++;
+            hitTimer = HIT_COOLDOWN;
+        }
     }
 
     /**
@@ -81,7 +98,7 @@ public class Player extends Entity{
     }
 
     // getters
-    public float getHealth() { return health ;}
+    public int getHits() { return hits; }
 
     public float getX() { return rect.x; }
 
@@ -90,9 +107,4 @@ public class Player extends Entity{
     public float getHeight() { return texture.getHeight() * PLAYER_SCALE; }
 
     public float getWidth() { return texture.getWidth() * PLAYER_SCALE; }
-
-    // setters
-    public void setHealth(float newHealth) {
-        health = newHealth;
-    }
 }

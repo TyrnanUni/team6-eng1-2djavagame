@@ -75,7 +75,7 @@ public class Goose extends Entity{
         velocity.add(push);
 
         if (this.overlaps(player)) {
-            // lose health , slow down ? ...
+            player.hit();
         }
 
         rect.x += velocity.x * delta * SPEED;
