@@ -1,5 +1,6 @@
 BasicFont.ttf
 Campus_Background.png
 Goose.png
+Long_Boi.png
 Student_Forward.png
 WASDimg.png

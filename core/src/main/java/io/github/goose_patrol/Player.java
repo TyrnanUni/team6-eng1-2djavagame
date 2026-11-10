@@ -18,14 +18,9 @@ public class Player extends Entity{
     private final float HIT_COOLDOWN = 1.5f;
 
     // Values
-<<<<<<< HEAD
-    private float health;
-    public Vector2 velocity = new Vector2();
-=======
     private int hits;
     private float hitTimer;
     public static Vector2 velocity = new Vector2();
->>>>>>> 6c902ce (comment fix i think (my version and github out of sync for some reason)
 
     /**
      * Constructor
