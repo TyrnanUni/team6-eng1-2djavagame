@@ -20,7 +20,10 @@ public class ControlScreen extends ScreenAdapter {
     private final BitmapFont font;
     private final Viewport viewport = new ScreenViewport();
     private final GlyphLayout layout = new GlyphLayout();
-    private final Sprite controls = new Sprite(new Texture("WASDimg.png"));
+
+    // split texture into own field so can clear from GPU later
+    private final Texture controlsTexture = new Texture("WASDimg.png");
+    private final Sprite controls = new Sprite(controlsTexture);
 
 
     public ControlScreen(MainGame game) {
@@ -99,5 +102,12 @@ public class ControlScreen extends ScreenAdapter {
 
         batch.end();
         // end of draw batch
+    }
+
+    // clears font and WASD image from GPU
+    @Override
+    public void dispose() {
+        font.dispose();
+        controlsTexture.dispose();
     }
 }
