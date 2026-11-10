@@ -78,7 +78,6 @@ public class GameScreen extends ScreenAdapter {
         gameView.update(width, height, false);
     }
 
-
     // called when screen is set
     @Override
     public void show() {
