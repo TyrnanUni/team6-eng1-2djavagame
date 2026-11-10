@@ -2,7 +2,9 @@ package io.github.goose_patrol;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -63,6 +65,19 @@ public class Player extends Entity{
             hits++;
             hitTimer = HIT_COOLDOWN;
         }
+    }
+
+    // flashes red when hit (and duration of hit cool down)
+    @Override
+    public void draw(Batch batch) {
+        if (hitTimer > 0) {
+            int flashStep = (int) (hitTimer * 10);
+            if (flashStep % 2 == 0) {
+                batch.setColor(1f, 0.6f, 0.6f, 1f);
+            }
+        }
+        super.draw(batch);
+        batch.setColor(Color.WHITE);
     }
 
     /**
