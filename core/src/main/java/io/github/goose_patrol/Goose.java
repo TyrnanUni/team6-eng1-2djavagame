@@ -65,8 +65,9 @@ public class Goose extends Entity{
                 else {
                     diff.nor();
                 }
+                // think this (having outside if statement) will make dispersion slightly better
+                push.add(diff);
             }
-            push.add(diff);
         }
 
         if (!push.isZero()) {
