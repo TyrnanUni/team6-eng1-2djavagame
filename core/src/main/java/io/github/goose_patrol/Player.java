@@ -31,11 +31,10 @@ public class Player extends Entity{
      * @param gameView the game viewport
      * @param texture the player texture
      */
-    public Player(float x, float y, Viewport gameView, Texture texture) {
-        super(x, y, texture.getWidth() * PLAYER_SCALE, texture.getHeight() * PLAYER_SCALE, texture);
-
-        // Assets + objects
+    public Player(float x, float y, Viewport gameView, Texture texture, float HITBOX_SCALE) {
+        super(x, y, texture.getWidth() * PLAYER_SCALE, texture.getHeight() * PLAYER_SCALE, texture, HITBOX_SCALE);
     }
+
 
     /**
      * called when game starts/ restarts
@@ -109,10 +108,6 @@ public class Player extends Entity{
 
     // getters
     public int getHits() { return hits; }
-
-    public float getX() { return hitbox.x; }
-
-    public float getY() { return hitbox.y; }
 
     public float getHeight() { return texture.getHeight() * PLAYER_SCALE; }
 

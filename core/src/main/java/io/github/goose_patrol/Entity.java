@@ -8,30 +8,41 @@ import com.badlogic.gdx.math.Circle;
 
 // the class all players and enemies are from
 public abstract class Entity {
+    //hitbox
     protected final Circle hitbox;
+    protected float HITBOX_SCALE;
+
+    //Entity attributes
     protected Texture texture;
     protected float textureWidth;
     protected final float textureHeight;
 
     /**
      * Creates the entities rectangle and sets its attributes
+     * Hitbox.x or Hitbox.y gives the bottom left of the circle.
+     *
      * @param x pos of bottom left
      * @param y pos of bottom left
      * @param w texture width
      * @param h texture height
      * @param texture the image associated with the entity that will be drawn on screen
      */
-    public Entity(float x, float y, float w, float h, Texture texture) {
-        textureHeight = h;
-        textureWidth = w;
-        this.hitbox = new Circle(x + w/2, y + h/2, w/2.5f);
+    public Entity(float x, float y, float w, float h, Texture texture, float HITBOX_SCALE) {
+        textureHeight = h; // can be changed to scale the texture to fit when drawn
+        textureWidth = w;  // can be changed to scale the texture to fit when drawn
+
+        this.HITBOX_SCALE = HITBOX_SCALE;
+
+        this.hitbox = new Circle(y + textureHeight/2, x + textureWidth/2, textureWidth*HITBOX_SCALE);
         this.texture = texture;
     }
+
 
     // return true if the rectangles of the 2 objects are overlapping
     public boolean overlaps(Entity other) {
         return hitbox.overlaps(other.hitbox);
     }
+
 
     /**
      * Is called when we draw the entity on screen.
@@ -39,9 +50,9 @@ public abstract class Entity {
      */
     public void draw(Batch batch) {
         if (texture == null) return;
-
-        batch.draw(texture, hitbox.x, hitbox.y, textureWidth, textureHeight);
+        batch.draw(texture, getX(), getY(), textureWidth, textureHeight);
     }
+
 
     /**
      * A method that should be used to update the entities attributes or position.
@@ -55,6 +66,15 @@ public abstract class Entity {
      */
     public void drawHitbox(ShapeRenderer shapeRenderer) {
         shapeRenderer.setColor(Color.PURPLE);
-        shapeRenderer.circle(hitbox.x + textureWidth/2, hitbox.y + textureHeight/2, hitbox.radius, 60);
+        shapeRenderer.circle(getCenterX(), getCenterY(), hitbox.radius, 60);
     }
+
+    //getters
+    public float getCenterX() { return hitbox.x + textureWidth/2; }
+
+    public float getCenterY() { return hitbox.y + textureHeight/2; }
+
+    public float getX() { return hitbox.x;}
+
+    public float getY() { return hitbox.y;}
 }

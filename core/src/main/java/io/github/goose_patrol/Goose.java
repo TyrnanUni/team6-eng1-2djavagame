@@ -28,8 +28,8 @@ public class Goose extends Entity{
      * @param texture enemy texture
      * @param player player object tied to the enemies
      */
-    public Goose(float x, float y, Texture texture, Player player) {
-        super(x, y, texture.getWidth() * GOOSE_SCALE, texture.getHeight() * GOOSE_SCALE, texture);
+    public Goose(float x, float y, Texture texture, Player player, float HITBOX_SCALE) {
+        super(x, y, texture.getWidth() * GOOSE_SCALE, texture.getHeight() * GOOSE_SCALE, texture, HITBOX_SCALE);
         this.player = player;
         health = MAX_HEALTH;
     }
@@ -40,8 +40,8 @@ public class Goose extends Entity{
      */
     @Override
     void update(float delta) {
-        float Xdiff = player.getX() - getX();
-        float Ydiff = player.getY() - getY();
+        float Xdiff = player.getCenterX() - getCenterX();
+        float Ydiff = player.getCenterY() - getCenterY();
         float sld = (float) Math.sqrt((Xdiff*Xdiff) + (Ydiff*Ydiff)); // straight line distance
 
         // direction based on straight line distance, delta time needed to keep distance consistent across all frame rates
@@ -87,10 +87,6 @@ public class Goose extends Entity{
 
     // getters
     public float getHealth() { return health ;}
-
-    public float getX() { return hitbox.x; }
-
-    public float getY() { return hitbox.y; }
 
     public float getHeight() { return texture.getHeight() * GOOSE_SCALE; }
 

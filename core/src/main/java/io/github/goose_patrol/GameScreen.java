@@ -23,7 +23,6 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 public class GameScreen extends ScreenAdapter {
 
     // Constants
-    private final int MAX_TIME = 300;        // max time for game in seconds
     private final float SCREEN_WIDTH = 1162f; // width of background
     private final float SCREEN_HEIGHT = 650f; // height of background
     private final long GRACE = 5;             // time before geese can spawn
@@ -33,6 +32,8 @@ public class GameScreen extends ScreenAdapter {
     private final float BUTTON_W = 140f;      // pause button size (UI pixels)
     private final float BUTTON_H = 50f;
     private final float BUTTON_MARGIN = 15f;  // gap between pause button and screen corner
+    private final float PLAYER_HITBOX_SCALE = 0.2f; // hitbox scalers - does not affect size
+    private final float GOOSE_HITBOX_SCALE = 0.3f;
 
     //Assets
     private final Texture playerTexture = new Texture("Student_Forward.png");
@@ -50,11 +51,13 @@ public class GameScreen extends ScreenAdapter {
     private final GlyphLayout layout = new GlyphLayout();     // used to help with text formatting on screen
     private final ShapeRenderer shapeRenderer = new ShapeRenderer();
     private final Rectangle pauseButton = new Rectangle(); // on-screen pause/resume button, in UI pixels
-    public final Player player = new Player(SCREEN_WIDTH/2 , SCREEN_HEIGHT/2, gameView, playerTexture);
+    public final Player player = new Player(SCREEN_WIDTH/2 , SCREEN_HEIGHT/2, gameView, playerTexture, PLAYER_HITBOX_SCALE);
     public static Array<Goose> geese = new Array<>();
+    public static Array<Item> Inventory = new Array<>(5);
 
     // Time keeping
     // time is now counted with delta so it stops while the game is paused - might be some issues with keeping time on less powerfull machines
+    private final int MAX_TIME = 300;        // max time for game in seconds
     private float playTime;                   // seconds of un-paused play so far
     public long elapsed_T;                    // whole seconds of play so far
     private float spawnTimer;                 // time since last goose spawned
@@ -150,7 +153,7 @@ public class GameScreen extends ScreenAdapter {
 
             // stops at 20 geese to align with group docs (if statement runs before another goose added so prevents an extra goose spawning)
             if (spawnTimer >= SPAWNPERIOD && geese.size < MAX_GEESE) {
-                geese.add(new Goose(x, y, gooseTexture, player));
+                geese.add(new Goose(x, y, gooseTexture, player, GOOSE_HITBOX_SCALE));
                 spawnTimer = 0;
             }
         }
