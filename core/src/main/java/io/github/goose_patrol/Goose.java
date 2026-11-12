@@ -79,8 +79,8 @@ public class Goose extends Entity{
             player.hit();
         }
 
-        rect.x += velocity.x * delta * SPEED;
-        rect.y += velocity.y * delta * SPEED;
+        hitbox.x += velocity.x * delta * SPEED;
+        hitbox.y += velocity.y * delta * SPEED;
 
 
     }
@@ -88,9 +88,9 @@ public class Goose extends Entity{
     // getters
     public float getHealth() { return health ;}
 
-    public float getX() { return rect.x; }
+    public float getX() { return hitbox.x; }
 
-    public float getY() { return rect.y; }
+    public float getY() { return hitbox.y; }
 
     public float getHeight() { return texture.getHeight() * GOOSE_SCALE; }
 

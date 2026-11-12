@@ -43,7 +43,7 @@ public class Player extends Entity{
      * @param y bottom left starting y pos
      */
     public void reset(float x, float y) {
-        rect.setPosition(x, y);
+        hitbox.setPosition(x, y);
         hits = 0;
         hitTimer = 0;
     }
@@ -94,8 +94,8 @@ public class Player extends Entity{
 
         if (!velocity.isZero()) velocity.nor();
 
-        rect.x += velocity.x * delta * SPEED;
-        rect.y += velocity.y * delta * SPEED;
+        hitbox.x += velocity.x * delta * SPEED;
+        hitbox.y += velocity.y * delta * SPEED;
 
     }
 
@@ -103,16 +103,16 @@ public class Player extends Entity{
      * Stops player leaving the map - edges act as walls.
      */
     public void keepInside(float mapWidth, float mapHeight) {
-        rect.x = MathUtils.clamp(rect.x, 0, mapWidth - rect.width);
-        rect.y = MathUtils.clamp(rect.y, 0, mapHeight - rect.height);
+        hitbox.x = MathUtils.clamp(hitbox.x, 0, mapWidth - textureWidth);
+        hitbox.y = MathUtils.clamp(hitbox.y, 0, mapHeight - textureHeight);
     }
 
     // getters
     public int getHits() { return hits; }
 
-    public float getX() { return rect.x; }
+    public float getX() { return hitbox.x; }
 
-    public float getY() { return rect.y; }
+    public float getY() { return hitbox.y; }
 
     public float getHeight() { return texture.getHeight() * PLAYER_SCALE; }
 
