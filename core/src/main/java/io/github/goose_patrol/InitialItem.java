@@ -8,14 +8,22 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 public abstract class InitialItem extends Item{
 
     /**
-     * @param texture item texture
-     * @param x       item bottom left x co-ordinate
-     * @param y       item bottom left y co-ordinate
-     * @param w       item width - also sets rect width
-     * @param h       item height - also sets rect height
+     * @param texture   item texture
+     * @param x         item bottom left x co-ordinate
+     * @param y         item bottom left y co-ordinate
+     * @param w         item width - also sets rect width
+     * @param h         item height - also sets rect height
+     * @param COOLDOWN  item cooldown - time between item uses
      */
-    public InitialItem(Texture texture, float x, float y, float w, float h) {
-        super(texture, x, y, w, h);
+    public InitialItem(Texture texture, float x, float y, float w, float h, float COOLDOWN) {
+        super(texture, x, y, w, h, COOLDOWN);
+    }
+
+    // called when item is used - when cooldownLeft reaches 0
+    // see Item class
+    @Override
+    public void use() {
+
     }
 
 }

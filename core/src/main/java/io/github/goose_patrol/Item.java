@@ -16,6 +16,10 @@ public abstract class Item {
     //Values
     private final float textureWidth;
     private final float textureHeight;
+    private float cooldownLeft = 0;
+
+    //Constants
+    private final float COOLDOWN;
 
     /**
      * @param texture item texture
@@ -24,17 +28,20 @@ public abstract class Item {
      * @param w item width - also sets rect width
      * @param h item height - also sets rect height
      */
-    public Item(Texture texture, float x, float y, float w, float h) {
+    public Item(Texture texture, float x, float y, float w, float h, float COOLDOWN) {
         this.texture = texture;
         textureWidth = w;
         textureHeight = h;
         rect = new Rectangle(x, y, w, h);
+        this.COOLDOWN = COOLDOWN;
     }
 
     public void update(float delta, boolean activated){
-        if (activated) {
+        if (activated && cooldownLeft <= 0) {
+            cooldownLeft = COOLDOWN;
             use();
         }
+        if (cooldownLeft >= 0) cooldownLeft -= delta;
     }
 
     /**
@@ -50,4 +57,25 @@ public abstract class Item {
      * All items are different.
      */
     public abstract void use();
+
+    // getters
+    public float getCooldownLeft() {
+        return cooldownLeft;
+    }
+    public float getCOOLDOWN() {
+        return COOLDOWN;
+    }
+    public float getX() {
+        return rect.x;
+    }
+    public float getY() {
+        return rect.y;
+    }
+    public float getWidth() {
+        return textureWidth;
+    }
+    public float getHeight() {
+        return textureHeight;
+    }
 }
+

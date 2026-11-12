@@ -37,6 +37,8 @@ public class GameScreen extends ScreenAdapter {
     private final float ITEM_ICON_HEIGHT = 150f;
     private final float ITEM_ICON_WIDTH = 150f;
     private final float ITEM_ICON_MARGIN = 10f;
+    private final float ITEM1_COOLDOWN = 5f; // in seconds
+    private final float ITEM2_COOLDOWN = 5f;
 
 
     //Assets
@@ -103,8 +105,8 @@ public class GameScreen extends ScreenAdapter {
         player.reset(SCREEN_WIDTH/2f, SCREEN_HEIGHT/2f);
         geese.clear();
         inventory.clear();
-        inventory.add(new InitialItem_Placeholder1(itemTexture1, ITEM_ICON_MARGIN, ITEM_ICON_MARGIN, ITEM_ICON_WIDTH, ITEM_ICON_HEIGHT));
-        inventory.add(new InitialItem_Placeholder2(itemTexture2, (ITEM_ICON_WIDTH+ ITEM_ICON_MARGIN), ITEM_ICON_MARGIN, ITEM_ICON_WIDTH, ITEM_ICON_HEIGHT));
+        inventory.add(new InitialItem_Placeholder1(itemTexture1, ITEM_ICON_MARGIN, ITEM_ICON_MARGIN, ITEM_ICON_WIDTH, ITEM_ICON_HEIGHT, ITEM1_COOLDOWN));
+        inventory.add(new InitialItem_Placeholder2(itemTexture2, (ITEM_ICON_WIDTH+ ITEM_ICON_MARGIN), ITEM_ICON_MARGIN, ITEM_ICON_WIDTH, ITEM_ICON_HEIGHT, ITEM2_COOLDOWN));
     }
 
     // called by libGDX so when min or paused time stops
@@ -176,6 +178,7 @@ public class GameScreen extends ScreenAdapter {
         for (Item item : inventory) {
             int itemUsed = GooseUtil.getItemUsed();
             item.update(delta, (itemUsed == count + 1));
+            count++;
         }
 
         // iterates through geese and removes the geese with <= 0 health
@@ -249,7 +252,6 @@ public class GameScreen extends ScreenAdapter {
             shapeRenderer.setColor(0f, 0f, 0f, 0.6f);
             shapeRenderer.rect(0, 0, gameView.getScreenWidth(), gameView.getScreenHeight());
         }
-
         shapeRenderer.setColor(Color.WHITE);
 
         // draws rectangle for items to be drawn on-top of
@@ -264,6 +266,17 @@ public class GameScreen extends ScreenAdapter {
             shapeRenderer.rect(pauseButton.x, pauseButton.y, pauseButton.width, pauseButton.height);
         }
         shapeRenderer.rect(BUTTON_MARGIN, pauseButton.y, BUTTON_W + 40, BUTTON_H);
+
+        shapeRenderer.setColor(0f, 0f, 0f, 0.6f);
+        for (Item item : inventory) {
+            float cooldownLeft = item.getCooldownLeft();
+            float cooldown = item.getCOOLDOWN();
+            if (cooldownLeft <= 0) {
+                continue;
+            }
+            else{ shapeRenderer.rect(item.getX(), item.getY(), item.getWidth(), cooldownLeft/cooldown * item.getHeight());}
+        }
+
         shapeRenderer.end();
         Gdx.gl.glDisable(GL20.GL_BLEND);
 
