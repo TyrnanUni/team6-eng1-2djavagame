@@ -13,8 +13,7 @@ public class GooseUtil {
     private static final float LIMIT = 150f;  // how far away from the minimum the geese can spawn,
 
                                               // spawning them too far away makes them not impactful and a waste of resources.
-    private GooseUtil() {
-    }
+
 
     /**
      * Used for enemies
