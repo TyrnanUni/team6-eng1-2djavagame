@@ -31,11 +31,10 @@ public abstract class Item {
         rect = new Rectangle(x, y, w, h);
     }
 
-    public void update(float delta, Batch batch, boolean activated){
+    public void update(float delta, boolean activated){
         if (activated) {
             use();
         }
-        draw(batch);
     }
 
     /**
@@ -48,6 +47,7 @@ public abstract class Item {
     /**
      * Method called in updated when activated becomes true.
      * This is where we use the item.
+     * All items are different.
      */
     public abstract void use();
 }

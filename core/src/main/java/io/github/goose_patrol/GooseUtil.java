@@ -2,6 +2,7 @@ package io.github.goose_patrol;
 
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
@@ -60,6 +61,17 @@ public class GooseUtil {
         BitmapFont font = generator.generateFont(fontParam); // takes params with ttf font to generate bitmap font
         generator.dispose();
         return font;
+    }
+
+    /**
+     * Returns the number of key pressed if it corresponds to an item.
+     * @return int num key pressed. returns -1 if none apply
+     */
+    public static int getItemUsed() {
+        // can add more but we only need 2 for now
+        if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_1)) return 1;
+        if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_2)) return 2;
+        return -1;
     }
 
 }

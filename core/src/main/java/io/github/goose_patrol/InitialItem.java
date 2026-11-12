@@ -5,7 +5,7 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 
 // items that start in inventory
 // all initial inventory items should extend this class
-public class InitialItem extends Item{
+public abstract class InitialItem extends Item{
 
     /**
      * @param texture item texture
@@ -17,11 +17,5 @@ public class InitialItem extends Item{
     public InitialItem(Texture texture, float x, float y, float w, float h) {
         super(texture, x, y, w, h);
     }
-
-    @Override
-    public void use() {
-        //
-    }
-
 
 }

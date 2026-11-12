@@ -5,7 +5,7 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 
 // items that are found as pickups across the map
 // all map pickup items should extend this class
-public class PickUpItem extends Item{
+public abstract class PickUpItem extends Item{
 
     /**
      * @param texture item texture
@@ -22,10 +22,5 @@ public class PickUpItem extends Item{
     public void draw(Batch batch) {
         // should override draw to allow it to be drawn on the map as well as UI
         // not as simple to draw as for InitialItem
-    }
-
-    @Override
-    public void use() {
-        // use item here
     }
 }

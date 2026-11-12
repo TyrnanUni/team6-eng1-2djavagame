@@ -34,11 +34,18 @@ public class GameScreen extends ScreenAdapter {
     private final float BUTTON_MARGIN = 15f;  // gap between pause button and screen corner
     private final float PLAYER_HITBOX_SCALE = 0.2f; // hitbox scalers - does not affect size
     private final float GOOSE_HITBOX_SCALE = 0.3f;
+    private final float ITEM_ICON_HEIGHT = 150f;
+    private final float ITEM_ICON_WIDTH = 150f;
+    private final float ITEM_ICON_MARGIN = 10f;
+
 
     //Assets
     private final Texture playerTexture = new Texture("Student_Forward.png");
     private final Texture gooseTexture = new Texture("Goose.png");
     private final Texture background = new Texture("Campus_Background.png");
+           // placeholders
+    private final Texture itemTexture1 = new Texture("Item_Placeholder1.png");
+    private final Texture itemTexture2 = new Texture("Item_Placeholder2.png");
 
     // Objects
     private final MainGame game;
@@ -56,7 +63,7 @@ public class GameScreen extends ScreenAdapter {
     // on-screen pause/resume button, in UI pixels
     public final Player player = new Player(SCREEN_WIDTH/2 , SCREEN_HEIGHT/2, playerTexture, PLAYER_HITBOX_SCALE);
     public static Array<Goose> geese = new Array<>();
-    public static Array<Item> Inventory = new Array<>(5);
+    public static Array<Item> inventory = new Array<>(5);
 
     // Time keeping
     // time is now counted with delta so it stops while the game is paused - might be some issues with keeping time on less powerful machines
@@ -93,8 +100,11 @@ public class GameScreen extends ScreenAdapter {
     // called when screen is set
     @Override
     public void show() {
-        player.reset(SCREEN_WIDTH/2, SCREEN_HEIGHT/2);
+        player.reset(SCREEN_WIDTH/2f, SCREEN_HEIGHT/2f);
         geese.clear();
+        inventory.clear();
+        inventory.add(new InitialItem_Placeholder1(itemTexture1, ITEM_ICON_MARGIN, ITEM_ICON_MARGIN, ITEM_ICON_WIDTH, ITEM_ICON_HEIGHT));
+        inventory.add(new InitialItem_Placeholder2(itemTexture2, (ITEM_ICON_WIDTH+ ITEM_ICON_MARGIN), ITEM_ICON_MARGIN, ITEM_ICON_WIDTH, ITEM_ICON_HEIGHT));
     }
 
     // called by libGDX so when min or paused time stops
@@ -161,6 +171,13 @@ public class GameScreen extends ScreenAdapter {
             }
         }
 
+        // iterates through items whilst checking their index against the number pressed
+        int count = 0;
+        for (Item item : inventory) {
+            int itemUsed = GooseUtil.getItemUsed();
+            item.update(delta, (itemUsed == count + 1));
+        }
+
         // iterates through geese and removes the geese with <= 0 health
         removeList.clear();
         int index = 0;
@@ -208,11 +225,11 @@ public class GameScreen extends ScreenAdapter {
         String timerStr = String.format("%d:%02d", minutesLeft, secondsLeft);
 
         gameView.apply();
+
         batch.begin();
         batch.draw(background, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-        for (Goose goose : geese) {
-            goose.draw(batch);
-        }
+        // draws Entities
+        for (Goose goose : geese) goose.draw(batch);
         player.draw(batch);
         batch.end();
 
@@ -234,8 +251,16 @@ public class GameScreen extends ScreenAdapter {
         }
 
         shapeRenderer.setColor(Color.WHITE);
+
+        // draws rectangle for items to be drawn on-top of
+        shapeRenderer.rect(ITEM_ICON_MARGIN, ITEM_ICON_MARGIN,
+                (ITEM_ICON_WIDTH * inventory.size) + (ITEM_ICON_MARGIN * (inventory.size +1)),
+                ITEM_ICON_MARGIN *2 + ITEM_ICON_HEIGHT);
+
+        // draws rectangle for timer to be drawn on-top of
         shapeRenderer.rect(XCentre - layout.width/2f, gameView.getScreenHeight() - layout.height, layout.width + 25, layout.height);
         if (!gameOver) {
+            //draws pause button rectangle
             shapeRenderer.rect(pauseButton.x, pauseButton.y, pauseButton.width, pauseButton.height);
         }
         shapeRenderer.rect(BUTTON_MARGIN, pauseButton.y, BUTTON_W + 40, BUTTON_H);
@@ -244,6 +269,8 @@ public class GameScreen extends ScreenAdapter {
 
         // all rest of rendering here
         batch.begin();
+        for (Item item : inventory) item.draw(batch);
+
         font.draw(batch, layout, XCentre - layout.width/2, gameView.getScreenHeight());
 
         // pause button label
