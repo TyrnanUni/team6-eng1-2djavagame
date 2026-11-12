@@ -1,30 +1,36 @@
 package io.github.goose_patrol;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Circle;
 
 // the class all players and enemies are from
 public abstract class Entity {
-    protected final Rectangle rect;
+    protected final Circle hitbox;
     protected Texture texture;
+    protected float textureWidth;
+    protected final float textureHeight;
 
     /**
      * Creates the entities rectangle and sets its attributes
      * @param x pos of bottom left
      * @param y pos of bottom left
-     * @param w desired width of rectangle - usually the same as texture
-     * @param h desired height of rectangle - usually the same as the texture
+     * @param w texture width
+     * @param h texture height
      * @param texture the image associated with the entity that will be drawn on screen
      */
     public Entity(float x, float y, float w, float h, Texture texture) {
-        this.rect = new Rectangle(x, y, w, h);
+        textureHeight = h;
+        textureWidth = w;
+        this.hitbox = new Circle(x + w/2, y + h/2, w/2.5f);
         this.texture = texture;
     }
 
     // return true if the rectangles of the 2 objects are overlapping
     public boolean overlaps(Entity other) {
-        return rect.overlaps(other.rect);
+        return hitbox.overlaps(other.hitbox);
     }
 
     /**
@@ -34,7 +40,7 @@ public abstract class Entity {
     public void draw(Batch batch) {
         if (texture == null) return;
 
-        batch.draw(texture, rect.x, rect.y, rect.width, rect.height);
+        batch.draw(texture, hitbox.x, hitbox.y, textureWidth, textureHeight);
     }
 
     /**
@@ -43,4 +49,12 @@ public abstract class Entity {
      */
     abstract void update(float delta);
 
+
+    /**
+     * Used for debugging to highlight hitboxes
+     */
+    public void drawHitbox(ShapeRenderer shapeRenderer) {
+        shapeRenderer.setColor(Color.PURPLE);
+        shapeRenderer.circle(hitbox.x + textureWidth/2, hitbox.y + textureHeight/2, hitbox.radius, 60);
+    }
 }

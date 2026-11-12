@@ -210,6 +210,9 @@ public class GameScreen extends ScreenAdapter {
         player.draw(batch);
         batch.end();
 
+        // draws hitboxes attached to camera and gameView for debugging
+        Debugger.drawAllHitbox(player, geese, gameView, camera);
+
         batch.getProjectionMatrix().setToOrtho2D(0, 0, gameView.getScreenWidth(), gameView.getScreenHeight());
         shapeRenderer.setProjectionMatrix(batch.getProjectionMatrix());
 
@@ -223,6 +226,7 @@ public class GameScreen extends ScreenAdapter {
             shapeRenderer.setColor(0f, 0f, 0f, 0.6f);
             shapeRenderer.rect(0, 0, gameView.getScreenWidth(), gameView.getScreenHeight());
         }
+
         shapeRenderer.setColor(Color.WHITE);
         shapeRenderer.rect(XCentre - layout.width/2f, gameView.getScreenHeight() - layout.height, layout.width + 25, layout.height);
         if (!gameOver) {
