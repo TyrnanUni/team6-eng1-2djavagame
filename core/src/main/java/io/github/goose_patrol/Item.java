@@ -10,16 +10,16 @@ import com.badlogic.gdx.math.Rectangle;
  */
 public abstract class Item {
     //Objects
-    private final Texture texture;
-    private final Rectangle rect;
+    protected final Texture texture;
+    protected Rectangle rect;
 
     //Values
-    private final float textureWidth;
-    private final float textureHeight;
-    private float cooldownLeft = 0;
+    protected final float textureWidth;
+    protected final float textureHeight;
+    protected float cooldownLeft = 0;
 
     //Constants
-    private final float COOLDOWN;
+    protected final float COOLDOWN;
 
     /**
      * @param texture item texture
@@ -36,14 +36,6 @@ public abstract class Item {
         this.COOLDOWN = COOLDOWN;
     }
 
-    public void update(float delta, boolean activated){
-        if (activated && cooldownLeft <= 0) {
-            cooldownLeft = COOLDOWN;
-            use();
-        }
-        if (cooldownLeft >= 0) cooldownLeft -= delta;
-    }
-
     /**
      * @param batch the draw batch
      */
@@ -51,29 +43,18 @@ public abstract class Item {
         batch.draw(texture, rect.x, rect.y, rect.width, rect.height);
     }
 
-    /**
-     * Method called in updated when activated becomes true.
-     * This is where we use the item.
-     * All items are different.
-     */
-    public abstract void use();
+    public abstract void update(float delta, boolean activated);
 
     // getters
-    public float getCooldownLeft() {
-        return cooldownLeft;
-    }
-    public float getCOOLDOWN() {
-        return COOLDOWN;
-    }
     public float getX() {
         return rect.x;
     }
-    public float getY() {
-        return rect.y;
-    }
+
+    public float getY() { return rect.y; }
     public float getWidth() {
         return textureWidth;
     }
+
     public float getHeight() {
         return textureHeight;
     }

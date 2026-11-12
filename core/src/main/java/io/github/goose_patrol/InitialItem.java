@@ -19,11 +19,14 @@ public abstract class InitialItem extends Item{
         super(texture, x, y, w, h, COOLDOWN);
     }
 
-    // called when item is used - when cooldownLeft reaches 0
-    // see Item class
-    @Override
-    public void use() {
+    public abstract void use();
 
+    public void update(float delta, boolean activated){
+        if (activated && cooldownLeft <= 0) {
+            cooldownLeft = COOLDOWN;
+            use();
+        }
+        if (cooldownLeft >= 0) cooldownLeft -= delta;
     }
 
 }

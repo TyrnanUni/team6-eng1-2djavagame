@@ -2,7 +2,8 @@ package io.github.goose_patrol;
 
 import com.badlogic.gdx.graphics.Texture;
 
-public class InitialItem_Placeholder2 extends InitialItem{
+public class ShieldItem extends InitialItem{
+
 
     /**
      * @param texture  item texture
@@ -12,7 +13,7 @@ public class InitialItem_Placeholder2 extends InitialItem{
      * @param h        item height - also sets rect height
      * @param COOLDOWN item cooldown - time between item uses
      */
-    public InitialItem_Placeholder2(Texture texture, float x, float y, float w, float h, float COOLDOWN) {
+    public ShieldItem(Texture texture, float x, float y, float w, float h, float COOLDOWN) {
         super(texture, x, y, w, h, COOLDOWN);
     }
 

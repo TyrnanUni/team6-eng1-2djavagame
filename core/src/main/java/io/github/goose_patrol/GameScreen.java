@@ -37,8 +37,8 @@ public class GameScreen extends ScreenAdapter {
     private final float ITEM_ICON_HEIGHT = 150f;
     private final float ITEM_ICON_WIDTH = 150f;
     private final float ITEM_ICON_MARGIN = 10f;
-    private final float ITEM1_COOLDOWN = 5f; // in seconds
-    private final float ITEM2_COOLDOWN = 5f;
+    private final float SHIELD_COOLDOWN = 5f; // in seconds
+    private final float HEAL_COOLDOWN = 5f;
 
 
     //Assets
@@ -46,8 +46,8 @@ public class GameScreen extends ScreenAdapter {
     private final Texture gooseTexture = new Texture("Goose.png");
     private final Texture background = new Texture("Campus_Background.png");
            // placeholders
-    private final Texture itemTexture1 = new Texture("Item_Placeholder1.png");
-    private final Texture itemTexture2 = new Texture("Item_Placeholder2.png");
+    private final Texture ShieldTexture = new Texture("Shield.png");
+    private final Texture HealTexture = new Texture("Heal.png");
 
     // Objects
     private final MainGame game;
@@ -105,8 +105,8 @@ public class GameScreen extends ScreenAdapter {
         player.reset(SCREEN_WIDTH/2f, SCREEN_HEIGHT/2f);
         geese.clear();
         inventory.clear();
-        inventory.add(new InitialItem_Placeholder1(itemTexture1, ITEM_ICON_MARGIN, ITEM_ICON_MARGIN, ITEM_ICON_WIDTH, ITEM_ICON_HEIGHT, ITEM1_COOLDOWN));
-        inventory.add(new InitialItem_Placeholder2(itemTexture2, (ITEM_ICON_WIDTH+ ITEM_ICON_MARGIN), ITEM_ICON_MARGIN, ITEM_ICON_WIDTH, ITEM_ICON_HEIGHT, ITEM2_COOLDOWN));
+        inventory.add(new ShieldItem(ShieldTexture, ITEM_ICON_MARGIN, ITEM_ICON_MARGIN, ITEM_ICON_WIDTH, ITEM_ICON_HEIGHT, SHIELD_COOLDOWN));
+        inventory.add(new HealItem(HealTexture, (ITEM_ICON_WIDTH+ ITEM_ICON_MARGIN), ITEM_ICON_MARGIN, ITEM_ICON_WIDTH, ITEM_ICON_HEIGHT, HEAL_COOLDOWN));
     }
 
     // called by libGDX so when min or paused time stops
@@ -269,8 +269,8 @@ public class GameScreen extends ScreenAdapter {
 
         shapeRenderer.setColor(0f, 0f, 0f, 0.6f);
         for (Item item : inventory) {
-            float cooldownLeft = item.getCooldownLeft();
-            float cooldown = item.getCOOLDOWN();
+            float cooldownLeft = item.cooldownLeft;
+            float cooldown = item.COOLDOWN;
             if (cooldownLeft <= 0) {
                 continue;
             }
