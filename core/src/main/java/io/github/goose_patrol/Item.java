@@ -26,8 +26,8 @@ public abstract class Item {
      */
     public Item(Texture texture, float x, float y, float w, float h) {
         this.texture = texture;
-        textureWidth = texture.getWidth();
-        textureHeight = texture.getHeight();
+        textureWidth = w;
+        textureHeight = h;
         rect = new Rectangle(x, y, w, h);
     }
 

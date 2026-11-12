@@ -254,8 +254,8 @@ public class GameScreen extends ScreenAdapter {
 
         // draws rectangle for items to be drawn on-top of
         shapeRenderer.rect(ITEM_ICON_MARGIN, ITEM_ICON_MARGIN,
-                (ITEM_ICON_WIDTH * inventory.size) + (ITEM_ICON_MARGIN * (inventory.size +1)),
-                ITEM_ICON_MARGIN *2 + ITEM_ICON_HEIGHT);
+                (ITEM_ICON_WIDTH * inventory.size),
+                ITEM_ICON_HEIGHT);
 
         // draws rectangle for timer to be drawn on-top of
         shapeRenderer.rect(XCentre - layout.width/2f, gameView.getScreenHeight() - layout.height, layout.width + 25, layout.height);
@@ -268,6 +268,7 @@ public class GameScreen extends ScreenAdapter {
         Gdx.gl.glDisable(GL20.GL_BLEND);
 
         // all rest of rendering here
+        batch.setProjectionMatrix(shapeRenderer.getProjectionMatrix());
         batch.begin();
         for (Item item : inventory) item.draw(batch);
 
