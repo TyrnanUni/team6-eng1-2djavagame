@@ -10,12 +10,12 @@ import com.badlogic.gdx.math.Rectangle;
  */
 public abstract class Item {
     //Objects
-    private Texture texture;
-    private Rectangle rect;
+    private final Texture texture;
+    private final Rectangle rect;
 
     //Values
-    private float textureWidth;
-    private float textureHeight;
+    private final float textureWidth;
+    private final float textureHeight;
 
     /**
      * @param texture item texture

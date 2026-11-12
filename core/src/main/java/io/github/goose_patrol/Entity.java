@@ -33,7 +33,7 @@ public abstract class Entity {
 
         this.HITBOX_SCALE = HITBOX_SCALE;
 
-        this.hitbox = new Circle(y + textureHeight/2, x + textureWidth/2, textureWidth*HITBOX_SCALE);
+        this.hitbox = new Circle(x + textureWidth/2, y + textureHeight/2, textureWidth*HITBOX_SCALE);
         this.texture = texture;
     }
 
@@ -70,11 +70,11 @@ public abstract class Entity {
     }
 
     //getters
-    public float getCenterX() { return hitbox.x + textureWidth/2; }
+    public float getCenterX() { return hitbox.x;}
 
-    public float getCenterY() { return hitbox.y + textureHeight/2; }
+    public float getCenterY() { return hitbox.y;}
 
-    public float getX() { return hitbox.x;}
+    public float getX() { return hitbox.x - textureWidth/2f;}
 
-    public float getY() { return hitbox.y;}
+    public float getY() { return hitbox.y - textureHeight/2f;}
 }

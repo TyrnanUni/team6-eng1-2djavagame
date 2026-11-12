@@ -7,7 +7,6 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.utils.viewport.Viewport;
 
 /**
  * A class expressing a Player. Can be controlled by user input.
@@ -22,16 +21,15 @@ public class Player extends Entity{
     // Values
     private int hits;
     private float hitTimer;
-    public static Vector2 velocity = new Vector2();
+    public final Vector2 velocity = new Vector2();
 
     /**
      * Constructor
      * @param x bottom left starting x pos
      * @param y bottom left starting y pos
-     * @param gameView the game viewport
      * @param texture the player texture
      */
-    public Player(float x, float y, Viewport gameView, Texture texture, float HITBOX_SCALE) {
+    public Player(float x, float y,  Texture texture, float HITBOX_SCALE) {
         super(x, y, texture.getWidth() * PLAYER_SCALE, texture.getHeight() * PLAYER_SCALE, texture, HITBOX_SCALE);
     }
 

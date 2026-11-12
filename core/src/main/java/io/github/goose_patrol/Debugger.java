@@ -14,10 +14,8 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 public class Debugger {
 
     private static final ShapeRenderer shapeRenderer = new ShapeRenderer();
-    private static Viewport gameview;
 
-    public static void drawAllHitbox(Player player, Array<Goose> geese, Viewport viewport, OrthographicCamera camera) {
-        gameview = viewport;
+    public static void drawAllHitbox(Player player, Array<Goose> geese,  OrthographicCamera camera) {
         shapeRenderer.setProjectionMatrix(camera.combined);
 
         Gdx.gl.glLineWidth(4.0f);

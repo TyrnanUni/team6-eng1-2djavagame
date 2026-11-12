@@ -26,7 +26,7 @@ public class GameScreen extends ScreenAdapter {
     private final float SCREEN_WIDTH = 1162f; // width of background
     private final float SCREEN_HEIGHT = 650f; // height of background
     private final long GRACE = 5;             // time before geese can spawn
-    private final float SPAWNPERIOD = 3.5f;     // how long between each goose spawning
+    private final float SPAWN_PERIOD = 3.5f;     // how long between each goose spawning
     private final int MAX_GEESE = 20;         // maximum number of geese that can be instantiated at once
     private final int MAX_HITS = 5;
     private final float BUTTON_W = 140f;      // pause button size (UI pixels)
@@ -50,13 +50,16 @@ public class GameScreen extends ScreenAdapter {
     private final Viewport gameView = new FitViewport(SCREEN_WIDTH/3, SCREEN_HEIGHT/3, camera);  // viewport locked on the player
     private final GlyphLayout layout = new GlyphLayout();     // used to help with text formatting on screen
     private final ShapeRenderer shapeRenderer = new ShapeRenderer();
-    private final Rectangle pauseButton = new Rectangle(); // on-screen pause/resume button, in UI pixels
-    public final Player player = new Player(SCREEN_WIDTH/2 , SCREEN_HEIGHT/2, gameView, playerTexture, PLAYER_HITBOX_SCALE);
+    private final Rectangle pauseButton = new Rectangle();
+    private final Array<Integer> removeList = new Array<>();
+
+    // on-screen pause/resume button, in UI pixels
+    public final Player player = new Player(SCREEN_WIDTH/2 , SCREEN_HEIGHT/2, playerTexture, PLAYER_HITBOX_SCALE);
     public static Array<Goose> geese = new Array<>();
     public static Array<Item> Inventory = new Array<>(5);
 
     // Time keeping
-    // time is now counted with delta so it stops while the game is paused - might be some issues with keeping time on less powerfull machines
+    // time is now counted with delta so it stops while the game is paused - might be some issues with keeping time on less powerful machines
     private final int MAX_TIME = 300;        // max time for game in seconds
     private float playTime;                   // seconds of un-paused play so far
     public long elapsed_T;                    // whole seconds of play so far
@@ -143,7 +146,7 @@ public class GameScreen extends ScreenAdapter {
         elapsed_T = (long) playTime;
         timeLeft = MAX_TIME - playTime;
 
-        // spawn geese in every {SPAWNPERIOD} seconds
+        // spawn geese in every {SPAWN PERIOD} seconds
         // continually drawn unless 'dispersed'
         spawnTimer += delta;
         if (elapsed_T >= GRACE) {
@@ -152,28 +155,28 @@ public class GameScreen extends ScreenAdapter {
             float y = GooseUtil.getEnemySpawnY(player);
 
             // stops at 20 geese to align with group docs (if statement runs before another goose added so prevents an extra goose spawning)
-            if (spawnTimer >= SPAWNPERIOD && geese.size < MAX_GEESE) {
+            if (spawnTimer >= SPAWN_PERIOD && geese.size < MAX_GEESE) {
                 geese.add(new Goose(x, y, gooseTexture, player, GOOSE_HITBOX_SCALE));
                 spawnTimer = 0;
             }
         }
 
         // iterates through geese and removes the geese with <= 0 health
-        Array<Integer> removeList = new Array<>();
-        int indx = 0;
+        removeList.clear();
+        int index = 0;
         for (Goose goose : geese) {
             if (goose.getHealth() <= 0.0f) {
-                removeList.add(indx);
+                removeList.add(index);
             }
             goose.update(delta);
-            ++ indx;
+            ++ index;
         }
         for (int goose : removeList) {
             // may be changed to call a way of getting rid of the geese without them just disappearing
             geese.removeIndex(goose);
         }
 
-        player.update(delta); // updates player status - pos, hit cooldown etc..
+        player.update(delta); // updates player status - pos, hit cooldown etc...
         player.keepInside(SCREEN_WIDTH, SCREEN_HEIGHT); // map edges act as walls
 
         if (player.getHits() >= MAX_HITS) {
@@ -195,7 +198,7 @@ public class GameScreen extends ScreenAdapter {
 
     // draws the things on the scene
     public void draw() {
-        // gets position of centre of the game area for ease of drawing
+        // gets position of center of the game area for ease of drawing
         float XCentre = gameView.getScreenWidth() / 2f;
         float YCentre = gameView.getScreenHeight() / 2f;
 
@@ -214,7 +217,7 @@ public class GameScreen extends ScreenAdapter {
         batch.end();
 
         // draws hitboxes attached to camera and gameView for debugging
-        Debugger.drawAllHitbox(player, geese, gameView, camera);
+        Debugger.drawAllHitbox(player, geese, camera);
 
         batch.getProjectionMatrix().setToOrtho2D(0, 0, gameView.getScreenWidth(), gameView.getScreenHeight());
         shapeRenderer.setProjectionMatrix(batch.getProjectionMatrix());

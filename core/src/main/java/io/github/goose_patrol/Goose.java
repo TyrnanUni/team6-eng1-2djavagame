@@ -18,8 +18,9 @@ public class Goose extends Entity{
 
     // Objects
     private final Player player;
-    public Vector2 velocity = new Vector2(0,0);
-    public Vector2 push = new Vector2(0,0);
+    public final Vector2 velocity = new Vector2(0,0);
+    public final Vector2 push = new Vector2(0,0);
+    private final Vector2 diff = new Vector2(0, 0);
 
     /**
      * Creates a goose enemy. Player is needed as a param as the position and pathfinding relies on it because it's centered around the player.
@@ -45,7 +46,7 @@ public class Goose extends Entity{
         float sld = (float) Math.sqrt((Xdiff*Xdiff) + (Ydiff*Ydiff)); // straight line distance
 
         // direction based on straight line distance, delta time needed to keep distance consistent across all frame rates
-        // used sld to normalise velocity
+        // used sld to normalize velocity
         if (sld > 0) {
             velocity.set(Xdiff/sld, Ydiff/sld);
         } else {
@@ -54,7 +55,7 @@ public class Goose extends Entity{
 
         // this just keeps the geese from packing to closely together, it offsets their velocity by the direction of the incoming geese.
         push.set(0, 0);
-        Vector2 diff = new Vector2(0, 0);
+        diff.set(0, 0);
         for (int i = 0; i < GameScreen.geese.size; ++i) {
             Goose other = GameScreen.geese.get(i);
             if (this == other) continue;

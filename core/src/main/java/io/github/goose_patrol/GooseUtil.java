@@ -9,7 +9,7 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 // utility for use in other classes to help make code look cleaner and easier to read
 public class GooseUtil {
 
-    private static final float RANGE = 170f ; // minimum range from the player that geese can spawn
+    private static final float RANGE = 240f ; // minimum range from the player that geese can spawn
     private static final float LIMIT = 80f;  // how far away from the minimum the geese can spawn,
                                               // spawning them too far away makes them not impactful and a waste of resources.
 
@@ -57,7 +57,9 @@ public class GooseUtil {
         fontParam.size = size;         // font size
         fontParam.color = color;       // font color
 
-        return generator.generateFont(fontParam); // takes params with ttf font to generate bitmap font
+        BitmapFont font = generator.generateFont(fontParam); // takes params with ttf font to generate bitmap font
+        generator.dispose();
+        return font;
     }
 
 }
