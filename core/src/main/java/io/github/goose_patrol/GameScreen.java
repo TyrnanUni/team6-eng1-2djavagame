@@ -133,8 +133,7 @@ public class GameScreen extends ScreenAdapter {
             }
         }
         // toggle pause
-        else if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) || Gdx.input.isKeyJustPressed(Input.Keys.Q)
-                || pauseButtonClicked()) {
+        else if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) || Gdx.input.isKeyJustPressed(Input.Keys.Q)) {
             GamePause();
         }
 
@@ -206,14 +205,15 @@ public class GameScreen extends ScreenAdapter {
         }
     }
 
-    // if true on frame game pause
-    private boolean pauseButtonClicked() {
-        if (!Gdx.input.justTouched()) return false;
-        // mouse y is measured from the top of the window, UI is drawn from the bottom of the game area
-        float mx = Gdx.input.getX() - gameView.getScreenX();
-        float my = Gdx.graphics.getHeight() - Gdx.input.getY() - gameView.getScreenY();
-        return pauseButton.contains(mx, my);
-    }
+    // code for using mouse control //
+//    // if true on frame game pause
+//    private boolean pauseButtonClicked() {
+//        if (!Gdx.input.justTouched()) return false;
+//        // mouse y is measured from the top of the window, UI is drawn from the bottom of the game area
+//        float mx = Gdx.input.getX() - gameView.getScreenX();
+//        float my = Gdx.graphics.getHeight() - Gdx.input.getY() - gameView.getScreenY();
+//        return pauseButton.contains(mx, my);
+//    }
 
     // draws the things on the scene
     public void draw() {
@@ -262,12 +262,18 @@ public class GameScreen extends ScreenAdapter {
         // draws rectangle for timer to be drawn on-top of
         shapeRenderer.rect(XCentre - layout.width/2f, gameView.getScreenHeight() - layout.height - BUTTON_MARGIN*2, layout.width + BUTTON_PADDING, layout.height + BUTTON_PADDING);
         if (!gameOver) {
-            //draws pause button rectangle
-            shapeRenderer.rect(pauseButton.x, pauseButton.y, pauseButton.width, pauseButton.height);
+            //draws pause button
+            if (!paused) layout.setText(smallFont, "PAUSE");
+            else {layout.setText(smallFont, "RESUME");}
+
+            shapeRenderer.rect(gameView.getScreenWidth() - layout.width - BUTTON_MARGIN - BUTTON_PADDING*2,
+                    gameView.getScreenHeight() - layout.height - BUTTON_MARGIN - BUTTON_PADDING*2,
+                    layout.width + BUTTON_PADDING*2, layout.height + BUTTON_PADDING*2);
         }
         // Health panel
         layout.setText(smallFont, hitsStr);
-        shapeRenderer.rect(BUTTON_MARGIN, gameView.getScreenHeight() - layout.height - BUTTON_PADDING*2, layout.width + BUTTON_PADDING, layout.height + BUTTON_PADDING);
+        shapeRenderer.rect(BUTTON_MARGIN, gameView.getScreenHeight() - layout.height - BUTTON_PADDING*2,
+                layout.width + BUTTON_PADDING, layout.height + BUTTON_PADDING);
 
         shapeRenderer.setColor(0f, 0f, 0f, 0.6f);
         for (Item item : inventory) {
@@ -292,7 +298,8 @@ public class GameScreen extends ScreenAdapter {
 
         // timer text
         layout.setText(font, timerStr);
-        font.draw(batch, layout, XCentre - layout.width/2 + BUTTON_PADDING/2, gameView.getScreenHeight() - BUTTON_PADDING*1.5f);
+        font.draw(batch, layout,
+                XCentre - layout.width/2 + BUTTON_PADDING/2, gameView.getScreenHeight() - BUTTON_PADDING*1.5f);
 
         // pause button label
         if (!gameOver) {
@@ -302,8 +309,8 @@ public class GameScreen extends ScreenAdapter {
                 layout.setText(smallFont, "PAUSE");
             }
             smallFont.draw(batch, layout,
-                pauseButton.x + (pauseButton.width - layout.width) / 2f,
-                pauseButton.y + (pauseButton.height + layout.height) / 2f);
+                gameView.getScreenWidth() - layout.width - BUTTON_MARGIN - BUTTON_PADDING,
+                gameView.getScreenHeight() - BUTTON_MARGIN - BUTTON_PADDING);
         }
 
         // Health panel text
