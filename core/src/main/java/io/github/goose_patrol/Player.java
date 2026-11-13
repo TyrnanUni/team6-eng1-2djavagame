@@ -30,8 +30,6 @@ public class Player extends Entity{
     //Objects
     public final Vector2 velocity = new Vector2();
 
-
-
     /**
      * Constructor
      * @param x bottom left starting x pos
