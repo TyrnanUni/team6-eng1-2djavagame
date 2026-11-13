@@ -28,8 +28,6 @@ public class GameScreen extends ScreenAdapter {
     private final long GRACE = 5;                     // time before geese can spawn
     private final float SPAWN_PERIOD = 3.5f;          // how long between each goose spawning
     private final int MAX_GEESE = 20;                 // maximum number of geese that can be instantiated at once
-    private final float BUTTON_W = 140f;              // pause button size (UI pixels)
-    private final float BUTTON_H = 50f;
     private final float BUTTON_MARGIN = 15f;          // gap between buttons and screen corner
     private final float BUTTON_PADDING = 15f;         // space around the text on a button
     private final float PLAYER_HITBOX_SCALE = 0.2f;   // hitbox scalers - does not affect size on screen
@@ -84,7 +82,7 @@ public class GameScreen extends ScreenAdapter {
         this.game = game;
         batch = game.getBatch();
         font = GooseUtil.getFont(Color.BLACK, 100);
-        smallFont = GooseUtil.getFont(Color.BLACK, 32);
+        smallFont = GooseUtil.getFont(Color.BLACK, 50);
         overlayFont = GooseUtil.getFont(Color.WHITE, 32);
     }
 
@@ -119,11 +117,6 @@ public class GameScreen extends ScreenAdapter {
     @Override
     public void render(float delta) {
         ScreenUtils.clear(Color.BLACK);
-
-        // pause button sits in the top right corner of the screen
-        pauseButton.set(gameView.getScreenWidth() - BUTTON_W - BUTTON_MARGIN,
-                        gameView.getScreenHeight() - BUTTON_H - BUTTON_MARGIN,
-                        BUTTON_W, BUTTON_H);
 
         if (gameOver) {
             if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {
@@ -263,8 +256,8 @@ public class GameScreen extends ScreenAdapter {
         shapeRenderer.rect(XCentre - layout.width/2f, gameView.getScreenHeight() - layout.height - BUTTON_MARGIN*2, layout.width + BUTTON_PADDING, layout.height + BUTTON_PADDING);
         if (!gameOver) {
             //draws pause button
-            if (!paused) layout.setText(smallFont, "PAUSE");
-            else {layout.setText(smallFont, "RESUME");}
+            if (paused) layout.setText(smallFont, "PAUSED");
+            else {layout.setText(smallFont, "Q/ESC TO PAUSE");}
 
             shapeRenderer.rect(gameView.getScreenWidth() - layout.width - BUTTON_MARGIN - BUTTON_PADDING*2,
                     gameView.getScreenHeight() - layout.height - BUTTON_MARGIN - BUTTON_PADDING*2,
@@ -304,9 +297,9 @@ public class GameScreen extends ScreenAdapter {
         // pause button label
         if (!gameOver) {
             if (paused) {
-                layout.setText(smallFont, "RESUME");
+                layout.setText(smallFont, "PAUSED");
             } else {
-                layout.setText(smallFont, "PAUSE");
+                layout.setText(smallFont, "Q/ESC to PAUSE");
             }
             smallFont.draw(batch, layout,
                 gameView.getScreenWidth() - layout.width - BUTTON_MARGIN - BUTTON_PADDING,
@@ -340,7 +333,7 @@ public class GameScreen extends ScreenAdapter {
         else if (paused) {
             layout.setText(overlayFont, "PAUSED");
             overlayFont.draw(batch, layout, XCentre - layout.width/2f, YCentre + layout.height);
-            layout.setText(overlayFont, "Press Esc / Q or click RESUME to continue");
+            layout.setText(overlayFont, "Press Q or ESC to RESUME..");
             overlayFont.draw(batch, layout, XCentre - layout.width/2f, YCentre - layout.height);
         }
         batch.end();
