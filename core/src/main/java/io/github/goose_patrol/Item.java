@@ -12,6 +12,7 @@ public abstract class Item {
     //Objects
     protected final Texture texture;
     protected Rectangle rect;
+    protected final Player player;
 
     //Values
     protected final float textureWidth;
@@ -28,12 +29,13 @@ public abstract class Item {
      * @param w item width - also sets rect width
      * @param h item height - also sets rect height
      */
-    public Item(Texture texture, float x, float y, float w, float h, float COOLDOWN) {
+    public Item(Texture texture, float x, float y, float w, float h, float COOLDOWN, Player player) {
         this.texture = texture;
         textureWidth = w;
         textureHeight = h;
         rect = new Rectangle(x, y, w, h);
         this.COOLDOWN = COOLDOWN;
+        this.player = player;
     }
 
     /**
@@ -43,7 +45,9 @@ public abstract class Item {
         batch.draw(texture, rect.x, rect.y, rect.width, rect.height);
     }
 
+
     public abstract void update(float delta, boolean activated);
+
 
     // getters
     public float getX() {

@@ -15,8 +15,8 @@ public abstract class PickUpItem extends Item{
      * @param h        item height - also sets rect height
      * @param COOLDOWN
      */
-    public PickUpItem(Texture texture, float x, float y, float w, float h, float COOLDOWN) {
-        super(texture, x, y, w, h, COOLDOWN);
+    public PickUpItem(Texture texture, float x, float y, float w, float h, float COOLDOWN, Player player) {
+        super(texture, x, y, w, h, COOLDOWN, player);
     }
 
     @Override

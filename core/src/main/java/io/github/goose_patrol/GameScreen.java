@@ -23,22 +23,21 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 public class GameScreen extends ScreenAdapter {
 
     // Constants
-    private final float SCREEN_WIDTH = 1162f; // width of background
-    private final float SCREEN_HEIGHT = 650f; // height of background
-    private final long GRACE = 5;             // time before geese can spawn
-    private final float SPAWN_PERIOD = 3.5f;     // how long between each goose spawning
-    private final int MAX_GEESE = 20;         // maximum number of geese that can be instantiated at once
-    private final int MAX_HITS = 5;
-    private final float BUTTON_W = 140f;      // pause button size (UI pixels)
+    private final float SCREEN_WIDTH = 1162f;         // width of background
+    private final float SCREEN_HEIGHT = 650f;         // height of background
+    private final long GRACE = 5;                     // time before geese can spawn
+    private final float SPAWN_PERIOD = 3.5f;          // how long between each goose spawning
+    private final int MAX_GEESE = 20;                 // maximum number of geese that can be instantiated at once
+    private final float BUTTON_W = 140f;              // pause button size (UI pixels)
     private final float BUTTON_H = 50f;
-    private final float BUTTON_MARGIN = 15f;  // gap between pause button and screen corner
-    private final float PLAYER_HITBOX_SCALE = 0.2f; // hitbox scalers - does not affect size
-    private final float GOOSE_HITBOX_SCALE = 0.3f;
-    private final float ITEM_ICON_HEIGHT = 150f;
-    private final float ITEM_ICON_WIDTH = 150f;
-    private final float ITEM_ICON_MARGIN = 10f;
-    private final float SHIELD_COOLDOWN = 5f; // in seconds
-    private final float HEAL_COOLDOWN = 5f;
+    private final float BUTTON_MARGIN = 15f;          // gap between buttons and screen corner
+    private final float BUTTON_PADDING = 15f;         // space around the text on a button
+    private final float PLAYER_HITBOX_SCALE = 0.2f;   // hitbox scalers - does not affect size on screen
+    private final float GOOSE_HITBOX_SCALE = 0.3f;    // hitbox scalers - does not affect size on screen
+    private final float ITEM_ICON_HEIGHT = 150f;      // height of items on the UI
+    private final float ITEM_ICON_WIDTH = 150f;       // width of items on the UI
+    private final float SHIELD_COOLDOWN = 10f;         // in seconds
+    private final float HEAL_COOLDOWN = 10f;
 
 
     //Assets
@@ -61,11 +60,11 @@ public class GameScreen extends ScreenAdapter {
     private final ShapeRenderer shapeRenderer = new ShapeRenderer();
     private final Rectangle pauseButton = new Rectangle();
     private final Array<Integer> removeList = new Array<>();
-
-    // on-screen pause/resume button, in UI pixels
     public final Player player = new Player(SCREEN_WIDTH/2 , SCREEN_HEIGHT/2, playerTexture, PLAYER_HITBOX_SCALE);
     public static Array<Goose> geese = new Array<>();
     public static Array<Item> inventory = new Array<>(5);
+    public final ShieldItem shield = new ShieldItem(ShieldTexture, BUTTON_MARGIN, BUTTON_MARGIN, ITEM_ICON_WIDTH, ITEM_ICON_HEIGHT, SHIELD_COOLDOWN, player);
+    public final HealItem heal = new HealItem(HealTexture, (ITEM_ICON_WIDTH+ BUTTON_MARGIN), BUTTON_MARGIN, ITEM_ICON_WIDTH, ITEM_ICON_HEIGHT, HEAL_COOLDOWN, player);
 
     // Time keeping
     // time is now counted with delta so it stops while the game is paused - might be some issues with keeping time on less powerful machines
@@ -105,8 +104,8 @@ public class GameScreen extends ScreenAdapter {
         player.reset(SCREEN_WIDTH/2f, SCREEN_HEIGHT/2f);
         geese.clear();
         inventory.clear();
-        inventory.add(new ShieldItem(ShieldTexture, ITEM_ICON_MARGIN, ITEM_ICON_MARGIN, ITEM_ICON_WIDTH, ITEM_ICON_HEIGHT, SHIELD_COOLDOWN));
-        inventory.add(new HealItem(HealTexture, (ITEM_ICON_WIDTH+ ITEM_ICON_MARGIN), ITEM_ICON_MARGIN, ITEM_ICON_WIDTH, ITEM_ICON_HEIGHT, HEAL_COOLDOWN));
+        inventory.add(shield);
+        inventory.add(heal);
     }
 
     // called by libGDX so when min or paused time stops
@@ -199,7 +198,7 @@ public class GameScreen extends ScreenAdapter {
         player.update(delta); // updates player status - pos, hit cooldown etc...
         player.keepInside(SCREEN_WIDTH, SCREEN_HEIGHT); // map edges act as walls
 
-        if (player.getHits() >= MAX_HITS) {
+        if (player.getHealth() <= 0) {
             GameOver(false);
         } else if (timeLeft <= 0) {
             timeLeft = 0;
@@ -242,7 +241,8 @@ public class GameScreen extends ScreenAdapter {
         batch.getProjectionMatrix().setToOrtho2D(0, 0, gameView.getScreenWidth(), gameView.getScreenHeight());
         shapeRenderer.setProjectionMatrix(batch.getProjectionMatrix());
 
-        String hitsStr = "Hits: " + player.getHits() + " / " + MAX_HITS;
+        // keeps it to 1 dp
+        String hitsStr = "HP: " + Math.round(player.getHealth()*10)/10f + " / " + player.MAX_HEALTH;
 
         layout.setText(font, timerStr);
 
@@ -255,17 +255,19 @@ public class GameScreen extends ScreenAdapter {
         shapeRenderer.setColor(Color.WHITE);
 
         // draws rectangle for items to be drawn on-top of
-        shapeRenderer.rect(ITEM_ICON_MARGIN, ITEM_ICON_MARGIN,
+        shapeRenderer.rect(BUTTON_MARGIN, BUTTON_MARGIN,
                 (ITEM_ICON_WIDTH * inventory.size),
                 ITEM_ICON_HEIGHT);
 
         // draws rectangle for timer to be drawn on-top of
-        shapeRenderer.rect(XCentre - layout.width/2f, gameView.getScreenHeight() - layout.height, layout.width + 25, layout.height);
+        shapeRenderer.rect(XCentre - layout.width/2f, gameView.getScreenHeight() - layout.height - BUTTON_MARGIN*2, layout.width + BUTTON_PADDING, layout.height + BUTTON_PADDING);
         if (!gameOver) {
             //draws pause button rectangle
             shapeRenderer.rect(pauseButton.x, pauseButton.y, pauseButton.width, pauseButton.height);
         }
-        shapeRenderer.rect(BUTTON_MARGIN, pauseButton.y, BUTTON_W + 40, BUTTON_H);
+        // Health panel
+        layout.setText(smallFont, hitsStr);
+        shapeRenderer.rect(BUTTON_MARGIN, gameView.getScreenHeight() - layout.height - BUTTON_PADDING*2, layout.width + BUTTON_PADDING, layout.height + BUTTON_PADDING);
 
         shapeRenderer.setColor(0f, 0f, 0f, 0.6f);
         for (Item item : inventory) {
@@ -280,12 +282,17 @@ public class GameScreen extends ScreenAdapter {
         shapeRenderer.end();
         Gdx.gl.glDisable(GL20.GL_BLEND);
 
-        // all rest of rendering here
+
+        // top layer batch render
         batch.setProjectionMatrix(shapeRenderer.getProjectionMatrix());
         batch.begin();
+
+        // item textures drawn
         for (Item item : inventory) item.draw(batch);
 
-        font.draw(batch, layout, XCentre - layout.width/2, gameView.getScreenHeight());
+        // timer text
+        layout.setText(font, timerStr);
+        font.draw(batch, layout, XCentre - layout.width/2 + BUTTON_PADDING/2, gameView.getScreenHeight() - BUTTON_PADDING*1.5f);
 
         // pause button label
         if (!gameOver) {
@@ -299,11 +306,12 @@ public class GameScreen extends ScreenAdapter {
                 pauseButton.y + (pauseButton.height + layout.height) / 2f);
         }
 
+        // Health panel text
         layout.setText(smallFont, hitsStr);
         smallFont.draw(batch, layout,
-            BUTTON_MARGIN + (BUTTON_W + 40 - layout.width) / 2f,
-            pauseButton.y + (BUTTON_H + layout.height) / 2f);
-
+            BUTTON_MARGIN*1.5f,
+            gameView.getScreenHeight() - BUTTON_PADDING*1.5f);
+        // GameOver / win screen
         if (gameOver) {
             String title;
             String message;
@@ -312,7 +320,7 @@ public class GameScreen extends ScreenAdapter {
                 message = "You survived the geese";
             } else {
                 title = "GAME OVER";
-                message = "The geese caught you " + MAX_HITS + " times";
+                message = "The geese caught you " + player.getHits() + " times";
             }
             layout.setText(overlayFont, title);
             overlayFont.draw(batch, layout, XCentre - layout.width/2f, YCentre + layout.height * 2);
@@ -353,4 +361,5 @@ public class GameScreen extends ScreenAdapter {
     public void GamePause() {
         paused = !paused;
     }
+
 }

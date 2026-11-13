@@ -15,12 +15,13 @@ public abstract class InitialItem extends Item{
      * @param h         item height - also sets rect height
      * @param COOLDOWN  item cooldown - time between item uses
      */
-    public InitialItem(Texture texture, float x, float y, float w, float h, float COOLDOWN) {
-        super(texture, x, y, w, h, COOLDOWN);
+    public InitialItem(Texture texture, float x, float y, float w, float h, float COOLDOWN, Player player) {
+        super(texture, x, y, w, h, COOLDOWN, player);
     }
 
     public abstract void use();
 
+    @Override
     public void update(float delta, boolean activated){
         if (activated && cooldownLeft <= 0) {
             cooldownLeft = COOLDOWN;

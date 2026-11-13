@@ -17,11 +17,17 @@ public class Player extends Entity{
     private static final float PLAYER_SCALE = 0.5f;
     private final float SPEED = 115f;
     private final float HIT_COOLDOWN = 1.5f;
+    public final float MAX_HEALTH = 10f;
+    public float healingPotency;
 
     // Values
     private int hits;
+    private float health;
     private float hitTimer;
+    private float healingTimer;
+    private float shield;
     public final Vector2 velocity = new Vector2();
+
 
     /**
      * Constructor
@@ -41,8 +47,10 @@ public class Player extends Entity{
      */
     public void reset(float x, float y) {
         hitbox.setPosition(x, y);
-        hits = 0;
+        health = MAX_HEALTH;
         hitTimer = 0;
+        shield = 0;
+        healingTimer = 0;
     }
 
     /**
@@ -55,24 +63,52 @@ public class Player extends Entity{
         if (hitTimer > 0) {
             hitTimer -= delta;
         }
+        if (shield > 0 ) {
+            shield -= delta;
+        }
+        if (healingTimer > 0) {
+            healingTimer -= delta;
+            if (health < MAX_HEALTH) {
+                health += healingPotency * delta;
+            }
+        }
     }
 
-    public void hit() {
-        if (hitTimer <= 0) {
-            hits++;
+    public void hit(float damage) {
+        if (hitTimer <= 0 && shield <= 0) {
+            ++hits;
+            health -= damage;
             hitTimer = HIT_COOLDOWN;
+            shield = 0;
         }
     }
 
     // flashes red when hit (and duration of hit cool down)
     @Override
     public void draw(Batch batch) {
+        // flashes red when hit
         if (hitTimer > 0) {
             int flashStep = (int) (hitTimer * 10);
             if (flashStep % 2 == 0) {
                 batch.setColor(1f, 0.6f, 0.6f, 1f);
             }
         }
+        // flashes blue when shielded
+        if (shield > 0) {
+            int flashStep = (int) (shield * 7);
+            if (flashStep % 2 == 0) {
+                batch.setColor(0.7f, 0.7f, 1f, 1f);
+            }
+
+        }
+        // flashes green when healing
+        if (healingTimer > 0) {
+            int flashStep = (int) (healingTimer * 7);
+            if (flashStep % 2 == 0) {
+                batch.setColor(0.7f, 1f, 0.7f, 1f);
+            }
+        }
+
         super.draw(batch);
         batch.setColor(Color.WHITE);
     }
@@ -105,9 +141,22 @@ public class Player extends Entity{
     }
 
     // getters
+    public float getHealth() { return health; }
+
     public int getHits() { return hits; }
 
     public float getHeight() { return texture.getHeight() * PLAYER_SCALE; }
 
     public float getWidth() { return texture.getWidth() * PLAYER_SCALE; }
+
+    // setters
+    public void setShield(float time) {
+        shield = time;
+    }
+    public void setHealingTimer(float time) {
+        healingTimer = time;
+    }
+    public void setHealingPotency(float potency) {
+        healingPotency = potency;
+    }
 }

@@ -12,6 +12,7 @@ public class Goose extends Entity{
     private static final float GOOSE_SCALE = 0.5f;
     private final float MAX_HEALTH = 100.0f;
     private final float SPEED = 90f;
+    private final float DAMAGE = 1f;
 
     // Values
     private float health;
@@ -77,7 +78,7 @@ public class Goose extends Entity{
         velocity.add(push);
 
         if (this.overlaps(player)) {
-            player.hit();
+            player.hit(DAMAGE);
         }
 
         hitbox.x += velocity.x * delta * SPEED;
