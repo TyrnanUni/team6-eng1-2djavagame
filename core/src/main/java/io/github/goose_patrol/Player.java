@@ -26,7 +26,10 @@ public class Player extends Entity{
     private float hitTimer;
     private float healingTimer;
     private float shield;
+
+    //Objects
     public final Vector2 velocity = new Vector2();
+
 
 
     /**
@@ -120,10 +123,10 @@ public class Player extends Entity{
     public void Input(float delta) {
         velocity.set(0, 0); // resets velocity so doesn't keep going after stopped pressing
 
-        if (Gdx.input.isKeyPressed(Input.Keys.W) || Gdx.input.isKeyPressed(Input.Keys.UP))    velocity.y += 1;
-        if (Gdx.input.isKeyPressed(Input.Keys.A) || Gdx.input.isKeyPressed(Input.Keys.LEFT))  velocity.x -= 1;
-        if (Gdx.input.isKeyPressed(Input.Keys.S) || Gdx.input.isKeyPressed(Input.Keys.DOWN))  velocity.y -= 1;
-        if (Gdx.input.isKeyPressed(Input.Keys.D) || Gdx.input.isKeyPressed(Input.Keys.RIGHT)) velocity.x += 1;
+        if (Gdx.input.isKeyPressed(Input.Keys.W) || Gdx.input.isKeyPressed(Input.Keys.UP))    velocity.y += 1f;
+        if (Gdx.input.isKeyPressed(Input.Keys.A) || Gdx.input.isKeyPressed(Input.Keys.LEFT))  velocity.x -= 1f;
+        if (Gdx.input.isKeyPressed(Input.Keys.S) || Gdx.input.isKeyPressed(Input.Keys.DOWN))  velocity.y -= 1f;
+        if (Gdx.input.isKeyPressed(Input.Keys.D) || Gdx.input.isKeyPressed(Input.Keys.RIGHT)) velocity.x += 1f;
 
         if (!velocity.isZero()) velocity.nor();
 
@@ -136,8 +139,8 @@ public class Player extends Entity{
      * Stops player leaving the map - edges act as walls.
      */
     public void keepInside(float mapWidth, float mapHeight) {
-        hitbox.x = MathUtils.clamp(hitbox.x, 0, mapWidth - textureWidth);
-        hitbox.y = MathUtils.clamp(hitbox.y, 0, mapHeight - textureHeight);
+        hitbox.x = MathUtils.clamp(hitbox.x, this.textureWidth/2f, mapWidth - this.textureWidth/2f);
+        hitbox.y = MathUtils.clamp(hitbox.y, this.textureHeight/2f, mapHeight - this.textureHeight/2f);
     }
 
     // getters

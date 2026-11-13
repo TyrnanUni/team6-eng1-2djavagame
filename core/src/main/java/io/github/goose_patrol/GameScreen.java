@@ -134,8 +134,19 @@ public class GameScreen extends ScreenAdapter {
             update(delta);
         }
 
-        camera.position.set(player.getX() + player.getWidth()/2.0f, player.getY() + player.getHeight()/2.0f, 0.0f);
-        camera.update(); // updates camera which makes sure no mismatching happens between player and camera - stops jittering
+        // Clamp the camera position so it stays within the map boundaries
+        float clampedX = com.badlogic.gdx.math.MathUtils.clamp(
+                player.getX() + player.getWidth() / 2f,
+                gameView.getWorldWidth()/2f,
+                SCREEN_WIDTH - gameView.getWorldWidth()/2f);
+
+        float clampedY = com.badlogic.gdx.math.MathUtils.clamp(
+                player.getY() + player.getHeight() / 2f,
+                gameView.getWorldHeight()/2f,
+                SCREEN_HEIGHT - gameView.getWorldHeight()/2f);
+        camera.position.set(clampedX, clampedY, 0.0f);
+        camera.update();
+
         batch.setProjectionMatrix(gameView.getCamera().combined);
 
         draw();
@@ -221,6 +232,7 @@ public class GameScreen extends ScreenAdapter {
 
         gameView.apply();
 
+        // lowest layer rendering first //
         batch.begin();
         batch.draw(background, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
         // draws Entities
@@ -282,7 +294,7 @@ public class GameScreen extends ScreenAdapter {
         Gdx.gl.glDisable(GL20.GL_BLEND);
 
 
-        // top layer batch render
+        // top layer batch render //
         batch.setProjectionMatrix(shapeRenderer.getProjectionMatrix());
         batch.begin();
 
