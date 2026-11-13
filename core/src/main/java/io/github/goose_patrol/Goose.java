@@ -44,41 +44,21 @@ public class Goose extends Entity{
     void update(float delta) {
         float Xdiff = player.getCenterX() - getCenterX();
         float Ydiff = player.getCenterY() - getCenterY();
-        float sld = (float) Math.sqrt((Xdiff*Xdiff) + (Ydiff*Ydiff)); // straight line distance
-
-        // direction based on straight line distance, delta time needed to keep distance consistent across all frame rates
-        // used sld to normalize velocity
-        if (sld > 0) {
-            velocity.set(Xdiff/sld, Ydiff/sld);
-        } else {
-            velocity.set(0, 0);
-        }
+        velocity.set(Xdiff, Ydiff).nor();
 
         // this just keeps the geese from packing to closely together, it offsets their velocity by the direction of the incoming geese.
-        push.set(0, 0);
-        diff.set(0, 0);
         for (int i = 0; i < GameScreen.geese.size; ++i) {
             Goose other = GameScreen.geese.get(i);
             if (this == other) continue;
 
-            if (this.overlaps(GameScreen.geese.get(i))) {
-                diff.set(this.velocity.x - other.velocity.x, this.velocity.y - other.velocity.y);
-                if (diff.isZero()) { diff.set(0, 1); }
-                else {
-                    diff.nor();
-                }
-                // think this (having outside if statement) will make dispersion slightly better
-                push.add(diff);
+            if (this.hitbox.overlaps(other.hitbox)) {
+                GooseUtil.seperate(other, this);
             }
         }
 
-        if (!push.isZero()) {
-            push.nor().scl(0.5f);
-        }
-        velocity.add(push);
-
         if (this.overlaps(player)) {
             player.hit(DAMAGE);
+            GooseUtil.seperate(this, player);
         }
 
         hitbox.x += velocity.x * delta * SPEED;

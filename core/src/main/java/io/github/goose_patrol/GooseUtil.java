@@ -6,6 +6,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.math.Vector2;
 
 // utility for use in other classes to help make code look cleaner and easier to read
 public class GooseUtil {
@@ -72,6 +73,25 @@ public class GooseUtil {
         if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_1)) return 1;
         if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_2)) return 2;
         return -1;
+    }
+
+    /**
+     * Takes 2 entities and separates them.
+     * @param target - the entity that should be moved
+     * @param actor - the entity doing the moving.
+     */
+    public static void seperate(Entity target, Entity actor) {
+        float distance = Vector2.dst(target.hitbox.x, target.hitbox.y, actor.hitbox.x, actor.hitbox.y);
+        float minDistance = target.hitbox.radius + actor.hitbox.radius;
+
+        if (distance < minDistance && distance > 0) {
+            float overlap = minDistance - distance;
+            // Push each goose away from the other by half the overlap distance
+            Vector2 separationDir = new Vector2(target.hitbox.x - actor.hitbox.x, target.hitbox.y - actor.hitbox.y).nor();
+
+            target.hitbox.x += separationDir.x * (overlap * 0.5f);
+            target.hitbox.y += separationDir.y * (overlap * 0.5f);
+        }
     }
 
 }
