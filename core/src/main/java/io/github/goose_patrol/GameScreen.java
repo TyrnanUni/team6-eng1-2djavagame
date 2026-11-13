@@ -239,9 +239,6 @@ public class GameScreen extends ScreenAdapter {
         batch.getProjectionMatrix().setToOrtho2D(0, 0, gameView.getScreenWidth(), gameView.getScreenHeight());
         shapeRenderer.setProjectionMatrix(batch.getProjectionMatrix());
 
-        // keeps it to 1 dp
-        String hitsStr = "HP: " + Math.round(player.getHealth()*10)/10f + " / " + player.MAX_HEALTH;
-
         layout.setText(timerFont, timerStr);
 
         Gdx.gl.glEnable(GL20.GL_BLEND);     // allows the use of alpha values - allows use of transparent shapes
@@ -268,10 +265,20 @@ public class GameScreen extends ScreenAdapter {
                     gameView.getScreenHeight() - layout.height - BUTTON_MARGIN - BUTTON_PADDING*2,
                     layout.width + BUTTON_PADDING*2, layout.height + BUTTON_PADDING*2);
         }
-        // Health panel
-        layout.setText(UIFont, hitsStr);
-        shapeRenderer.rect(BUTTON_MARGIN, gameView.getScreenHeight() - layout.height - BUTTON_PADDING*2,
-                layout.width + BUTTON_PADDING, layout.height + BUTTON_PADDING);
+
+        // health squares instead of string. disappear left to right
+        float squareSize = 30f;
+        float squareGap = 10f;
+        int maxSquares = (int) player.MAX_HEALTH;
+        float squaresWidth = maxSquares * squareSize + (maxSquares - 1) * squareGap;
+        float squaresStartX = XCentre - squaresWidth / 2f;
+        int squaresLeft = (int) Math.ceil(player.getHealth());
+
+        shapeRenderer.setColor(Color.RED);
+        for (int i = 0; i < squaresLeft; i++) {
+            float squareX = squaresStartX + i * (squareSize + squareGap);
+            shapeRenderer.rect(squareX, BUTTON_MARGIN, squareSize, squareSize);
+        }
 
         shapeRenderer.setColor(0f, 0f, 0f, 0.6f);
         for (Item item : inventory) {
@@ -311,11 +318,6 @@ public class GameScreen extends ScreenAdapter {
                 gameView.getScreenHeight() - BUTTON_MARGIN - BUTTON_PADDING);
         }
 
-        // Health panel text
-        layout.setText(UIFont, hitsStr);
-        UIFont.draw(batch, layout,
-            BUTTON_MARGIN*1.5f,
-            gameView.getScreenHeight() - BUTTON_PADDING*1.5f);
         // GameOver / win screen
         if (gameOver) {
             String title;
