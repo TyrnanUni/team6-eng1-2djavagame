@@ -81,6 +81,9 @@ public class GameScreen extends ScreenAdapter {
     private boolean gameOver;
     private boolean won;
 
+    // Values
+    private static int triggered;              // number of items or events triggered
+
     // Constructor
     public GameScreen(MainGame game) {
         this.game = game;
@@ -107,6 +110,7 @@ public class GameScreen extends ScreenAdapter {
         inventory.clear();
         inventory.add(shield);
         inventory.add(heal);
+        triggered = 0;
     }
 
     // called by libGDX so when min or paused time stops
@@ -257,6 +261,11 @@ public class GameScreen extends ScreenAdapter {
                 (ITEM_ICON_WIDTH * inventory.size),
                 ITEM_ICON_HEIGHT);
 
+        //draws counter panel
+        layout.setText(UIFont, "Items + Events\ntriggered:" + triggered);
+        shapeRenderer.rect(ITEM_ICON_WIDTH*inventory.size + BUTTON_PADDING,
+                BUTTON_MARGIN, layout.width + BUTTON_PADDING*2, layout.height + BUTTON_PADDING*2);
+
         // draws rectangle for timer to be drawn on-top of
         shapeRenderer.rect(XCentre - layout.width/2f, gameView.getScreenHeight() - layout.height - BUTTON_MARGIN*2, layout.width + BUTTON_PADDING, layout.height + BUTTON_PADDING);
         if (!gameOver) {
@@ -293,6 +302,11 @@ public class GameScreen extends ScreenAdapter {
 
         // item textures drawn
         for (Item item : inventory) item.draw(batch);
+
+        // Counter text
+        layout.setText(UIFont, "Items + Events\ntriggered: " + triggered);
+        UIFont.draw(batch, layout,
+                ITEM_ICON_WIDTH*inventory.size + BUTTON_PADDING*2, layout.height + BUTTON_MARGIN + BUTTON_PADDING);
 
         // timer text
         layout.setText(timerFont, timerStr);
@@ -367,4 +381,7 @@ public class GameScreen extends ScreenAdapter {
         paused = !paused;
     }
 
+    public static void incrementCounter() {
+        ++triggered;
+    }
 }

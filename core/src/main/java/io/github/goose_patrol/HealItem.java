@@ -20,5 +20,6 @@ public class HealItem extends InitialItem{
     public void use() {
         player.setHealingPotency(HEALING_POTENCY);
         player.setHealingTimer(5);
+        GameScreen.incrementCounter();
     }
 }
