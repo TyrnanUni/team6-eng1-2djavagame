@@ -89,11 +89,17 @@ public class ControlScreen extends ScreenAdapter {
         layout.setText(font, "D / RIGHT - Right");
         font.draw(batch,layout, XCentre + 80, y);
         y -= lineSpacing;
+        layout.setText(font, "1 - Use 1st item");
+        font.draw(batch,layout, XCentre + 80, y);
+        y -= lineSpacing;
+        layout.setText(font, "2 - Use 2nd item");
+        font.draw(batch,layout, XCentre + 80, y);
+        y -= lineSpacing;
         layout.setText(font, "Esc / Q - Pause / Play");
         font.draw(batch,layout, XCentre + 80, y);
         y -= lineSpacing;
 
-        controls.setPosition(XCentre - 150, YCentre - 80);
+        controls.setPosition(XCentre - 200, YCentre - 120);
         controls.draw(batch);
         y -= lineSpacing * 2;
 
