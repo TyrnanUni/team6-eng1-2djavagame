@@ -30,7 +30,7 @@ public class GameScreen extends ScreenAdapter {
     private final float STATUE_SCALE = 0.4f;              // scale of statue
     private final float LONG_BOI_SCALE = 0.7f;            // scale of longboi
     private final float PLAYER_SCALE = 0.5f;              // scale of player
-    private final float SEED_SCALE = 0.2f;                // scale of seed projectile
+    private final float SEED_SCALE = 0.15f;                // scale of seed projectile
     private final float GOOSE_SCALE = 0.4f;               // scale of goose texture
     private final float HEALTH_BAR_WIDTH = 500f;          // width of player health-bar
     private final float HEALTH_BAR_HEIGHT = 30f;          // height of player health-bar
@@ -50,6 +50,7 @@ public class GameScreen extends ScreenAdapter {
     private final float LONG_BOI_SPEED = 112f;            // longboi's speed
     private final float LONG_BOI_DAMAGE = 2f;             // ^^ damage
     private final float LONG_BOI_MAX_HP = 20f;            // ^^ max fullness
+    private final float LONG_BOI_SPAWN_INTERVAL = 25f;    // once statue broken, how frequently longboi's are spawned
 
 
     //UI Constants
@@ -92,12 +93,12 @@ public class GameScreen extends ScreenAdapter {
     public static Array<SeedProjectile> seeds = new Array<>();
     public final ShieldItem shield = new ShieldItem(shieldTexture, BUTTON_MARGIN + BUTTON_PADDING/2f, BUTTON_MARGIN + BUTTON_PADDING/2f, ITEM_ICON_WIDTH, ITEM_ICON_HEIGHT, SHIELD_COOLDOWN, player);
     public final HealItem heal = new HealItem(healTexture, (ITEM_ICON_WIDTH + BUTTON_PADDING + BUTTON_PADDING/2f + BUTTON_MARGIN), BUTTON_MARGIN + BUTTON_PADDING/2f, ITEM_ICON_WIDTH, ITEM_ICON_HEIGHT, HEAL_COOLDOWN, player);
-    public final Goose longBoi = new Goose(STATUE_X, STATUE_Y,longBoiTexture.getWidth()*LONG_BOI_SCALE, longBoiTexture.getHeight()*LONG_BOI_SCALE, longBoiTexture, player, LONG_BOI_HITBOX_SCALE);
     public final Statue statue = new Statue(STATUE_X, STATUE_Y, statueTexture.getWidth()*STATUE_SCALE, statueTexture.getHeight()*STATUE_SCALE, statueTexture, brokenStatue, STATUE_HITBOX_SCALE);
 
 
     // Values
     private float seedCooldownLeft = 0;
+    private float sinceLastLongboi;
 
 
     // Time keeping
@@ -112,7 +113,6 @@ public class GameScreen extends ScreenAdapter {
     private boolean paused = true;            // true while paused - game now starts paused
     private boolean gameOver;
     private boolean won;
-    private boolean longboiSpawned;
 
     public GameScreen(MainGame game) {
         this.game = game;
@@ -120,6 +120,20 @@ public class GameScreen extends ScreenAdapter {
         timerFont = GooseUtil.getFont(TIMER_FONT_COLOR, TIMER_FONT_SIZE);
         UIFont = GooseUtil.getFont(UI_FONT_COLOR, UI_FONT_SIZE);
         overlayFont = GooseUtil.getFont(OVERLAY_FONT_COLOR, OVERLAY_FONT_SIZE);
+    }
+
+    // checks that statue is broken and then spawns longboi's on an interval
+    public void longboiSpawner() {
+        if(statue.isBroken() && sinceLastLongboi <= 0) {
+            sinceLastLongboi = LONG_BOI_SPAWN_INTERVAL;
+            Goose longBoi = new Goose(STATUE_X, STATUE_Y,
+                    longBoiTexture.getWidth()*LONG_BOI_SCALE, longBoiTexture.getHeight()*LONG_BOI_SCALE,
+                    longBoiTexture, player, LONG_BOI_HITBOX_SCALE);
+            longBoi.setDamage(LONG_BOI_DAMAGE);
+            longBoi.setSpeed(LONG_BOI_SPEED);
+            longBoi.setMaxFullness(LONG_BOI_MAX_HP);
+            geese.add(longBoi);
+        }
     }
 
     @Override
@@ -133,16 +147,13 @@ public class GameScreen extends ScreenAdapter {
     // called when screen is set + game reset
     @Override
     public void show() {
-        longboiSpawned = false;
+        sinceLastLongboi = 0f;
         player.reset(SCREEN_WIDTH/2f, SCREEN_HEIGHT/2f);
         geese.clear();
         seeds.clear();
         inventory.clear();
         inventory.add(shield);
         inventory.add(heal);
-        longBoi.setDamage(LONG_BOI_DAMAGE);
-        longBoi.setSpeed(LONG_BOI_SPEED);
-        longBoi.setMaxFullness(LONG_BOI_MAX_HP);
     }
 
     // called by libGDX so when min or paused time stops
@@ -196,6 +207,9 @@ public class GameScreen extends ScreenAdapter {
         elapsed_T = (long) playTime;
         timeLeft = MAX_TIME - playTime;
         if (seedCooldownLeft > 0) seedCooldownLeft -= delta;
+        if (sinceLastLongboi > 0) sinceLastLongboi -= delta;
+
+        longboiSpawner();
 
         // spawn geese in every {SPAWN PERIOD} seconds
         // continually drawn unless 'dispersed'
@@ -220,10 +234,6 @@ public class GameScreen extends ScreenAdapter {
 
         statue.update(delta);
 
-        if (statue.isBroken() && !longboiSpawned) {
-            geese.add(longBoi);
-            longboiSpawned = true;
-        }
 
         // iterates through seed projectiles and deletes ones that are far enough away from the player
         for (int i = 0; i < seeds.size; i++) {

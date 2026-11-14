@@ -99,10 +99,7 @@ public class Goose extends Entity{
     @Override
     public void draw(Batch batch) {
         if (hitTimer > 0) {
-            int flashStep = (int) (hitTimer * 10);
-            if (flashStep % 2 == 0) {
-                batch.setColor(1f, 0.6f, 0.6f, 1f);
-            }
+            batch.setColor(1f, 0.6f, 0.6f, 1f);
         }
         super.draw(batch);
         batch.setColor(Color.WHITE);

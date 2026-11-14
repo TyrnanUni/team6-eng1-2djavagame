@@ -23,7 +23,6 @@ public class SeedProjectile extends Entity{
      * @param HITBOX_SCALE scales the hitbox
      * @param direction    vector expressing the direction in which the seed should go
      */
-
     public SeedProjectile(float x, float y, float w, float h, Texture texture, float HITBOX_SCALE, Vector2 direction) {
         super(x, y, w, h, texture, HITBOX_SCALE);
 
