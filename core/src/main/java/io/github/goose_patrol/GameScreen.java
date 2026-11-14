@@ -39,7 +39,7 @@ public class GameScreen extends ScreenAdapter {
     private final float SHIELD_COOLDOWN = 10f;         // in seconds
     private final float HEAL_COOLDOWN = 10f;
     private final float SEED_SHOOT_COOLDOWN = 0.1f;    // in seconds
-    private final float SEED_TRAVEL_DISTANCE = 150f;
+    private final float SEED_TRAVEL_DISTANCE = 200f;
 
     //UI Constants
     private final float ITEM_ICON_HEIGHT = 150f;      // height of items on the UI - texture stretches to fit
@@ -224,6 +224,7 @@ public class GameScreen extends ScreenAdapter {
         }
 
         // updates all geese
+        int index = 0;
         for (Goose goose : geese) {
             if (goose.getFullness() >= Goose.MAX_FULLNESS && !goose.Full) {
                 goose.runawaySequence();
@@ -231,7 +232,9 @@ public class GameScreen extends ScreenAdapter {
             for (SeedProjectile seed : seeds) {
                 if (goose.overlaps(seed)) goose.hit(seed);
             }
+            if (goose.shouldDespawn) geese.removeIndex(index);
             goose.update(delta);
+            index ++;
         }
 
         for (SeedProjectile seed : seeds) seed.update(delta);

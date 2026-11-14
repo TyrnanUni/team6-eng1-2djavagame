@@ -20,16 +20,15 @@ public class Goose extends Entity{
     public static final float MAX_FULLNESS = 10.0f;
     private final float DAMAGE = 1f;
     private final float SPEED = 90f;
-    private final float RUNAWAY_SPEED = 200f;
+    private final float RUNAWAY_SPEED = 50f;
     private final float HIT_COOLDOWN = 1f;
+    private final float DESPAWN_DIST = 200f;
 
     // Values
-
     private float fullness;
     public boolean Full;
-    private float despawnX;
-    private float despawnY;
     private float hitTimer;
+    public boolean shouldDespawn;
 
     // Objects
     private final Player player;
@@ -48,6 +47,7 @@ public class Goose extends Entity{
         fullness = 0;
         Full = false;
         hitTimer = 0;
+        shouldDespawn = false;
     }
 
     /**
@@ -61,18 +61,16 @@ public class Goose extends Entity{
 
         if (hitTimer > 0) hitTimer -= delta;
         // when full the gooses target changes to run off-screen
-        if (!Full) {
-            Xdiff = player.getCenterX() - getCenterX();
-            Ydiff = player.getCenterY() - getCenterY();
+        Xdiff = player.getCenterX() - getCenterX();
+        Ydiff = player.getCenterY() - getCenterY();
+
+        if (Full) velocity.set(Xdiff, Ydiff).nor().scl(-1);
+        else{ velocity.set(Xdiff, Ydiff).nor(); }
+
+        if ((Xdiff >= DESPAWN_DIST || Ydiff >= DESPAWN_DIST) && Full) {
+            despawn();
         }
-        else {
-            Xdiff = despawnX - getCenterX();
-            Ydiff = despawnY - getCenterY();
-            if (Xdiff == 0 && Ydiff == 0) {
-                despawn();
-            }
-        }
-        velocity.set(Xdiff, Ydiff).nor();
+
 
         // collision detection for other geese
         for (int i = 0; i < GameScreen.geese.size; ++i) {
@@ -149,21 +147,12 @@ public class Goose extends Entity{
     // called when goose is full
     public void runawaySequence() {
         fullness = MAX_FULLNESS; // prevents fullness going past max and messing with the fullness bar
-        despawnX = GooseUtil.getEnemySpawnX(player); // sets despawn location X
-        despawnY = GooseUtil.getEnemySpawnY(player); // Y component
         Full = true;
     }
 
     // called when goose has reached its despawn location
     public void despawn() {
-        Array<Goose> geese = GameScreen.geese;
-        int index = 0;
-        for (Goose goose : geese) {
-            if (goose == this) {
-                geese.removeIndex(index);
-            }
-            index ++;
-        }
+        shouldDespawn = true;
     }
 
 
