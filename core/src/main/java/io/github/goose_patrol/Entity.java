@@ -15,7 +15,7 @@ public abstract class Entity {
     //Entity attributes
     protected Texture texture;
     protected float textureWidth;
-    protected final float textureHeight;
+    protected float textureHeight;
 
     /**
      * Creates the entities rectangle and sets its attributes
@@ -26,6 +26,7 @@ public abstract class Entity {
      * @param w texture width
      * @param h texture height
      * @param texture the image associated with the entity that will be drawn on screen
+     * @param HITBOX_SCALE scales the hitbox
      */
     public Entity(float x, float y, float w, float h, Texture texture, float HITBOX_SCALE) {
         textureHeight = h; // can be changed to scale the texture to fit when drawn
@@ -77,4 +78,9 @@ public abstract class Entity {
     public float getX() { return hitbox.x - textureWidth/2f;}
 
     public float getY() { return hitbox.y - textureHeight/2f;}
+
+    public float getWidth() {return textureWidth;}
+
+    public float getHeight() {return textureHeight;}
+
 }

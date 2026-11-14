@@ -80,7 +80,7 @@ public class GooseUtil {
      * @param target - the entity that should be moved
      * @param actor - the entity doing the moving.
      */
-    public static void seperate(Entity target, Entity actor) {
+    public static void separate(Entity target, Entity actor) {
         float distance = Vector2.dst(target.hitbox.x, target.hitbox.y, actor.hitbox.x, actor.hitbox.y);
         float minDistance = target.hitbox.radius + actor.hitbox.radius;
 

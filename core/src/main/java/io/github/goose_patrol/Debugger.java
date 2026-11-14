@@ -15,11 +15,15 @@ public class Debugger {
 
     private static final ShapeRenderer shapeRenderer = new ShapeRenderer();
 
-    public static void drawAllHitbox(Player player, Array<Goose> geese,  OrthographicCamera camera) {
+    public static void drawAllHitbox(Array<SeedProjectile> seeds, Player player, Array<Goose> geese,  OrthographicCamera camera) {
         shapeRenderer.setProjectionMatrix(camera.combined);
 
         Gdx.gl.glLineWidth(4.0f);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+        for (SeedProjectile seed : seeds) {
+            seed.drawHitbox(shapeRenderer);
+        }
+
         for(Goose goose : geese) {
             goose.drawHitbox(shapeRenderer);
         }

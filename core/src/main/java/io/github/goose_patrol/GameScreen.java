@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
@@ -22,17 +23,23 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 public class GameScreen extends ScreenAdapter {
 
     // Constants
+    private final float PLAYER_SCALE = 0.5f;
+    private final float SEED_SCALE = 0.2f;
+    private final float GOOSE_SCALE = 0.4f;
     private final float HEALTH_BAR_WIDTH = 500f;
     private final float HEALTH_BAR_HEIGHT = 30f;
-    private final float SCREEN_WIDTH = 1162f;         // width of background
-    private final float SCREEN_HEIGHT = 650f;         // height of background
+    public static final float SCREEN_WIDTH = 1162f;         // width of background
+    public static final float SCREEN_HEIGHT = 650f;         // height of background
     private final long GRACE = 5;                     // time before geese can spawn
     private final float SPAWN_PERIOD = 3.5f;          // how long between each goose spawning
     private final int MAX_GEESE = 20;                 // maximum number of geese that can be instantiated at once
     private final float PLAYER_HITBOX_SCALE = 0.2f;   // hitbox scalers - does not affect size on screen
     private final float GOOSE_HITBOX_SCALE = 0.3f;    // hitbox scalers - does not affect size on screen
+    private final float SEED_HITBOX_SCALE = 0.2f;
     private final float SHIELD_COOLDOWN = 10f;         // in seconds
     private final float HEAL_COOLDOWN = 10f;
+    private final float SEED_SHOOT_COOLDOWN = 0.1f;    // in seconds
+    private final float SEED_TRAVEL_DISTANCE = 150f;
 
     //UI Constants
     private final float ITEM_ICON_HEIGHT = 150f;      // height of items on the UI - texture stretches to fit
@@ -50,8 +57,9 @@ public class GameScreen extends ScreenAdapter {
     private final Texture playerTexture = new Texture("Student_Forward.png");
     private final Texture gooseTexture = new Texture("Goose.png");
     private final Texture background = new Texture("Campus_Background.png");
-    private final Texture ShieldTexture = new Texture("Shield.png");
-    private final Texture HealTexture = new Texture("Heal.png");
+    private final Texture shieldTexture = new Texture("Shield.png");
+    private final Texture healTexture = new Texture("Heal.png");
+    private final Texture seedTexture = new Texture("SEED.png");
 
     // Objects
     private final MainGame game;
@@ -59,16 +67,17 @@ public class GameScreen extends ScreenAdapter {
     private final BitmapFont timerFont;
     private final BitmapFont UIFont;       // black text for the pause button
     private final BitmapFont overlayFont;     // white text for the pause overlay
+    private final Vector2 mouseScreenPosition = new Vector2();
     private final OrthographicCamera camera = new OrthographicCamera();
     private final Viewport gameView = new FitViewport(SCREEN_WIDTH/3, SCREEN_HEIGHT/3, camera);  // viewport locked on the player
     private final GlyphLayout layout = new GlyphLayout();     // used to help with text formatting on screen
     private final ShapeRenderer shapeRenderer = new ShapeRenderer();
-    private final Array<Integer> removeList = new Array<>();
-    public final Player player = new Player(SCREEN_WIDTH/2 , SCREEN_HEIGHT/2, playerTexture, PLAYER_HITBOX_SCALE);
+    public final Player player = new Player(SCREEN_WIDTH/2 , SCREEN_HEIGHT/2, playerTexture.getWidth() * PLAYER_SCALE, playerTexture.getHeight() * PLAYER_SCALE, playerTexture,  PLAYER_HITBOX_SCALE);
     public static Array<Goose> geese = new Array<>();
-    public static Array<Item> inventory = new Array<>(5);
-    public final ShieldItem shield = new ShieldItem(ShieldTexture, BUTTON_MARGIN + BUTTON_PADDING/2f, BUTTON_MARGIN + BUTTON_PADDING/2f, ITEM_ICON_WIDTH, ITEM_ICON_HEIGHT, SHIELD_COOLDOWN, player);
-    public final HealItem heal = new HealItem(HealTexture, (ITEM_ICON_WIDTH + BUTTON_PADDING + BUTTON_PADDING/2f + BUTTON_MARGIN), BUTTON_MARGIN + BUTTON_PADDING/2f, ITEM_ICON_WIDTH, ITEM_ICON_HEIGHT, HEAL_COOLDOWN, player);
+    public static Array<Item> inventory = new Array<>(2);
+    public static Array<SeedProjectile> seeds = new Array<>();
+    public final ShieldItem shield = new ShieldItem(shieldTexture, BUTTON_MARGIN + BUTTON_PADDING/2f, BUTTON_MARGIN + BUTTON_PADDING/2f, ITEM_ICON_WIDTH, ITEM_ICON_HEIGHT, SHIELD_COOLDOWN, player);
+    public final HealItem heal = new HealItem(healTexture, (ITEM_ICON_WIDTH + BUTTON_PADDING + BUTTON_PADDING/2f + BUTTON_MARGIN), BUTTON_MARGIN + BUTTON_PADDING/2f, ITEM_ICON_WIDTH, ITEM_ICON_HEIGHT, HEAL_COOLDOWN, player);
 
     // Time keeping
     // time is now counted with delta so it stops while the game is paused - might be some issues with keeping time on less powerful machines
@@ -77,6 +86,7 @@ public class GameScreen extends ScreenAdapter {
     public long elapsed_T;                    // whole seconds of play so far
     private float spawnTimer;                 // time since last goose spawned
     private float timeLeft = MAX_TIME;        // time left until the game ends
+    private float seedCooldownLeft = 0;
 
     // States
     private boolean paused = true;            // true while paused - game now starts paused
@@ -104,6 +114,7 @@ public class GameScreen extends ScreenAdapter {
     public void show() {
         player.reset(SCREEN_WIDTH/2f, SCREEN_HEIGHT/2f);
         geese.clear();
+        seeds.clear();
         inventory.clear();
         inventory.add(shield);
         inventory.add(heal);
@@ -159,6 +170,7 @@ public class GameScreen extends ScreenAdapter {
         playTime += delta;
         elapsed_T = (long) playTime;
         timeLeft = MAX_TIME - playTime;
+        if (seedCooldownLeft > 0) seedCooldownLeft -= delta;
 
         // spawn geese in every {SPAWN PERIOD} seconds
         // continually drawn unless 'dispersed'
@@ -170,10 +182,38 @@ public class GameScreen extends ScreenAdapter {
 
             // stops at 20 geese to align with group docs (if statement runs before another goose added so prevents an extra goose spawning)
             if (spawnTimer >= SPAWN_PERIOD && geese.size < MAX_GEESE) {
-                geese.add(new Goose(x, y, gooseTexture, player, GOOSE_HITBOX_SCALE));
+                geese.add(new Goose(x, y, gooseTexture.getWidth()*GOOSE_SCALE, gooseTexture.getHeight()*GOOSE_SCALE, gooseTexture, player, GOOSE_HITBOX_SCALE));
                 spawnTimer = 0;
             }
         }
+
+        // iterates through seed projectiles and deletes ones that are far enough away from the player
+        for (int i = 0; i < seeds.size; i++) {
+            SeedProjectile seed = seeds.get(i);
+
+            float distanceX = Math.abs(seed.getCenterX() - player.getCenterX());
+            float distanceY = Math.abs(seed.getCenterY() - player.getCenterY());
+
+            if (distanceX > SEED_TRAVEL_DISTANCE || distanceY > SEED_TRAVEL_DISTANCE ) {
+                seeds.removeIndex(i);
+            }
+
+        }
+
+        // spawns seed projectile when left mouse clicked
+        if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT) && !paused && !gameOver && seedCooldownLeft <= 0) {
+            seedCooldownLeft = SEED_SHOOT_COOLDOWN;
+            mouseScreenPosition.set(Gdx.input.getX(), Gdx.input.getY());
+            gameView.unproject(mouseScreenPosition);
+            Vector2 direction = new Vector2(mouseScreenPosition.x - player.getCenterX(),
+                    mouseScreenPosition.y - player.getCenterY()).nor();
+            float x = player.getCenterX() - (seedTexture.getWidth()*SEED_SCALE/2f);
+            float y = player.getCenterY() - (seedTexture.getHeight()*SEED_SCALE/2f);
+
+            seeds.add(new SeedProjectile(x, y, seedTexture.getWidth()*SEED_SCALE, seedTexture.getHeight()*SEED_SCALE, seedTexture, SEED_HITBOX_SCALE, direction));
+        }
+
+
 
         // iterates through items whilst checking their index against the number pressed
         int count = 0;
@@ -183,20 +223,18 @@ public class GameScreen extends ScreenAdapter {
             count++;
         }
 
-        // iterates through geese and removes the geese with <= 0 health
-        removeList.clear();
-        int index = 0;
+        // updates all geese
         for (Goose goose : geese) {
-            if (goose.getHealth() <= 0.0f) {
-                removeList.add(index);
+            if (goose.getFullness() >= Goose.MAX_FULLNESS && !goose.Full) {
+                goose.runawaySequence();
+            }
+            for (SeedProjectile seed : seeds) {
+                if (goose.overlaps(seed)) goose.hit(seed);
             }
             goose.update(delta);
-            ++ index;
         }
-        for (int goose : removeList) {
-            // may be changed to call a way of getting rid of the geese without them just disappearing
-            geese.removeIndex(goose);
-        }
+
+        for (SeedProjectile seed : seeds) seed.update(delta);
 
         player.update(delta); // updates player status - pos, hit cooldown etc...
         player.keepInside(SCREEN_WIDTH, SCREEN_HEIGHT); // map edges act as walls
@@ -227,25 +265,35 @@ public class GameScreen extends ScreenAdapter {
         batch.draw(background, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
         // draws all geese
         for (Goose goose : geese) goose.draw(batch);
+        for (SeedProjectile seed : seeds) seed.draw(batch);
         player.draw(batch);
         batch.end();
 
-//        // HIT BOX CODE //
-//        // draws hitboxes attached to camera and gameView for debugging
-//        Debugger.drawAllHitbox(player, geese, camera);
+        // HIT BOX CODE //
+        // draws hitboxes attached to camera and gameView for debugging
+        Debugger.drawAllHitbox(seeds, player, geese, camera);
 
         batch.getProjectionMatrix().setToOrtho2D(0, 0, gameView.getScreenWidth(), gameView.getScreenHeight());
-        shapeRenderer.setProjectionMatrix(batch.getProjectionMatrix());
+
 
         layout.setText(timerFont, timerStr);
 
         Gdx.gl.glEnable(GL20.GL_BLEND);
         // draws gray transparent screen for pause or game end
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        shapeRenderer.setProjectionMatrix(camera.combined);
+
+        // draws geese health-bar
+        for (Goose goose : geese) {
+            goose.drawGooseFullnessBar(shapeRenderer);
+        }
+
+        shapeRenderer.setProjectionMatrix(batch.getProjectionMatrix());
         if (paused || gameOver) {
             shapeRenderer.setColor(0f, 0f, 0f, 0.6f);
             shapeRenderer.rect(0, 0, gameView.getScreenWidth(), gameView.getScreenHeight());
         }
+
 
         // draws rectangle for items to be drawn on-top of
         shapeRenderer.setColor(Color.WHITE);
@@ -336,6 +384,7 @@ public class GameScreen extends ScreenAdapter {
         background.dispose();
         playerTexture.dispose();
         gooseTexture.dispose();
+        seedTexture.dispose();
         timerFont.dispose();
         UIFont.dispose();
         overlayFont.dispose();

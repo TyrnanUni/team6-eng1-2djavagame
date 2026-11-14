@@ -14,7 +14,6 @@ import com.badlogic.gdx.math.Vector2;
 public class Player extends Entity{
 
     // Constants - will be changed later but just some arbitrary values for now
-    private static final float PLAYER_SCALE = 0.5f;
     private final float SPEED = 115f;
     private final float HIT_COOLDOWN = 1.5f;
     public final float MAX_HEALTH = 10f;
@@ -27,6 +26,7 @@ public class Player extends Entity{
     private float healingTimer;
     private float shield;
 
+
     //Objects
     public final Vector2 velocity = new Vector2();
 
@@ -36,8 +36,8 @@ public class Player extends Entity{
      * @param y bottom left starting y pos
      * @param texture the player texture
      */
-    public Player(float x, float y,  Texture texture, float HITBOX_SCALE) {
-        super(x, y, texture.getWidth() * PLAYER_SCALE, texture.getHeight() * PLAYER_SCALE, texture, HITBOX_SCALE);
+    public Player(float x, float y, float w, float h, Texture texture, float HITBOX_SCALE) {
+        super(x, y, w, h, texture, HITBOX_SCALE);
     }
 
 
@@ -61,9 +61,8 @@ public class Player extends Entity{
     @Override
     public void update(float delta) {
         Input(delta);
-        if (hitTimer > 0) {
-            hitTimer -= delta;
-        }
+        if (hitTimer > 0) hitTimer -= delta;
+
         if (shield > 0 ) {
             shield -= delta;
         }
@@ -138,18 +137,15 @@ public class Player extends Entity{
      * Stops player leaving the map - edges act as walls.
      */
     public void keepInside(float mapWidth, float mapHeight) {
-        hitbox.x = MathUtils.clamp(hitbox.x, this.textureWidth/2f, mapWidth - this.textureWidth/2f);
-        hitbox.y = MathUtils.clamp(hitbox.y, this.textureHeight/2f, mapHeight - this.textureHeight/2f);
+        hitbox.x = MathUtils.clamp(hitbox.x, getWidth()/2f, mapWidth - getWidth()/2f);
+        hitbox.y = MathUtils.clamp(hitbox.y, getHeight()/2f, mapHeight - getHeight()/2f);
     }
+
 
     // getters
     public float getHealth() { return health; }
 
     public int getHits() { return hits; }
-
-    public float getHeight() { return texture.getHeight() * PLAYER_SCALE; }
-
-    public float getWidth() { return texture.getWidth() * PLAYER_SCALE; }
 
     public boolean isShielded() { return shield > 0;}
 
