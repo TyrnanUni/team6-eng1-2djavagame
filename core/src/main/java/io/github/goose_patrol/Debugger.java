@@ -15,7 +15,7 @@ public class Debugger {
 
     private static final ShapeRenderer shapeRenderer = new ShapeRenderer();
 
-    public static void drawAllHitbox(Array<SeedProjectile> seeds, Player player, Array<Goose> geese,  OrthographicCamera camera) {
+    public static void drawAllHitbox(Statue statue, Array<SeedProjectile> seeds, Player player, Array<Goose> geese,  OrthographicCamera camera) {
         shapeRenderer.setProjectionMatrix(camera.combined);
 
         Gdx.gl.glLineWidth(4.0f);
@@ -28,6 +28,8 @@ public class Debugger {
             goose.drawHitbox(shapeRenderer);
         }
         player.drawHitbox(shapeRenderer);
+        statue.drawHitbox(shapeRenderer);
+
         shapeRenderer.end();
     }
 }

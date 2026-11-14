@@ -70,6 +70,9 @@ public abstract class Entity {
         shapeRenderer.circle(getCenterX(), getCenterY(), hitbox.radius, 60);
     }
 
+    // setters
+    public void setTexture(Texture texture) {this.texture = texture;}
+
     //getters
     public float getCenterX() { return hitbox.x;}
 

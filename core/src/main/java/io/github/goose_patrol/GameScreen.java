@@ -23,40 +23,44 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 public class GameScreen extends ScreenAdapter {
 
     // Constants
-    private final float STATUE_X = 0f;
-    private final float STATUE_Y = 0f;
-    private final float STATUE_SCALE = 0.4f;
-    private final float LONG_BOI_SCALE = 0.6f;
-    private final float PLAYER_SCALE = 0.5f;
-    private final float SEED_SCALE = 0.2f;
-    private final float GOOSE_SCALE = 0.4f;
-    private final float HEALTH_BAR_WIDTH = 500f;
-    private final float HEALTH_BAR_HEIGHT = 30f;
-    public static final float SCREEN_WIDTH = 1162f;         // width of background
-    public static final float SCREEN_HEIGHT = 650f;         // height of background
-    private final long GRACE = 5;                     // time before geese can spawn
-    private final float SPAWN_PERIOD = 3.5f;          // how long between each goose spawning
-    private final int MAX_GEESE = 20;                 // maximum number of geese that can be instantiated at once
-    private final float PLAYER_HITBOX_SCALE = 0.2f;   // hitbox scalers - does not affect size on screen
-    private final float GOOSE_HITBOX_SCALE = 0.3f;    // hitbox scalers - does not affect size on screen
-    private final float LONG_BOI_HITBOX_SCALE = 0.5f;
-    private final float SEED_HITBOX_SCALE = 0.2f;
-    private final float SHIELD_COOLDOWN = 10f;         // in seconds
-    private final float HEAL_COOLDOWN = 10f;
-    private final float SEED_SHOOT_COOLDOWN = 0.1f;    // in seconds
-    private final float SEED_TRAVEL_DISTANCE = 200f;
+    public static final float SCREEN_WIDTH = 1162f;       // width of background
+    public static final float SCREEN_HEIGHT = 650f;       // height of background
+    private final float STATUE_X = SCREEN_WIDTH/2f;       // Y co-ordinate for the statue
+    private final float STATUE_Y = SCREEN_HEIGHT/2f;      // X co-ordinate for the statue
+    private final float STATUE_SCALE = 0.4f;              // scale of statue
+    private final float LONG_BOI_SCALE = 0.7f;            // scale of longboi
+    private final float PLAYER_SCALE = 0.5f;              // scale of player
+    private final float SEED_SCALE = 0.2f;                // scale of seed projectile
+    private final float GOOSE_SCALE = 0.4f;               // scale of goose texture
+    private final float HEALTH_BAR_WIDTH = 500f;          // width of player health-bar
+    private final float HEALTH_BAR_HEIGHT = 30f;          // height of player health-bar
+    private final float GRACE = 5;                        // time before geese can spawn
+    private final float SPAWN_PERIOD = 2.5f;              // how long between each goose spawning
+    private final int MAX_GEESE = 30;                     // maximum number of geese that can be instantiated at once
+    private final float PLAYER_HITBOX_SCALE = 0.2f;       // hitbox scalers - does not affect size on screen
+    private final float STATUE_HITBOX_SCALE = 0.5f;       // ^^^^^^^^^^
+    private final float GOOSE_HITBOX_SCALE = 0.3f;        // ^^^^^^^^^^
+    private final float LONG_BOI_HITBOX_SCALE = 0.55f;    // ^^^^^^^^^^
+    private final float SEED_HITBOX_SCALE = 0.2f;         // ^^^^^^^^^^
+    private final float SHIELD_COOLDOWN = 10f;            // in seconds
+    private final float HEAL_COOLDOWN = 10f;              // ^^^^^^^^^^
+    private final float SEED_SHOOT_COOLDOWN = 0.1f;       // ^^^^^^^^^^
+    private final float SEED_TRAVEL_DISTANCE = 200f;      // the distance the seed can travel from the player before being removed
+    private final float LONG_BOI_SPEED = 100f;
+    private final float LONG_BOI_DAMAGE = 2f;
+    private final float LONG_BOI_MAX_HP = 15f;
 
     //UI Constants
-    private final float ITEM_ICON_HEIGHT = 150f;      // height of items on the UI - texture stretches to fit
-    private final float ITEM_ICON_WIDTH = 150f;       // width of items on the UI
-    private final float BUTTON_MARGIN = 15f;          // gap between buttons and screen
-    private final float BUTTON_PADDING = 15f;         // space between edge of button and thing on the button
-    private final int UI_FONT_SIZE = 50;
-    private final int OVERLAY_FONT_SIZE = 50;
-    private final int TIMER_FONT_SIZE = 100;
-    private final Color UI_FONT_COLOR = Color.BLACK;
-    private final Color TIMER_FONT_COLOR = Color.BLACK;
-    private final Color OVERLAY_FONT_COLOR = Color.WHITE;
+    private final float ITEM_ICON_HEIGHT = 150f;          // height of items on the UI - texture stretches to fit
+    private final float ITEM_ICON_WIDTH = 150f;           // width of items on the UI
+    private final float BUTTON_MARGIN = 15f;              // gap between buttons and screen
+    private final float BUTTON_PADDING = 15f;             // space between edge of button and thing on the button
+    private final int UI_FONT_SIZE = 50;                  // size of UI font
+    private final int OVERLAY_FONT_SIZE = 50;             // size of overlay font
+    private final int TIMER_FONT_SIZE = 100;              // size of timer font
+    private final Color UI_FONT_COLOR = Color.BLACK;      // color of UI font
+    private final Color TIMER_FONT_COLOR = Color.BLACK;   // color of timer font
+    private final Color OVERLAY_FONT_COLOR = Color.WHITE; // color of overlay font
 
     //Assets
     private final Texture playerTexture = new Texture("Student_Forward.png");
@@ -67,6 +71,7 @@ public class GameScreen extends ScreenAdapter {
     private final Texture seedTexture = new Texture("SEED.png");
     private final Texture statueTexture = new Texture("LONG_BOI_STATUE.png");
     private final Texture longBoiTexture = new Texture("Long_Boi.png");
+    private final Texture brokenStatue = new Texture("Broken_Statue.png");
 
     // Objects
     private final MainGame game;
@@ -79,17 +84,18 @@ public class GameScreen extends ScreenAdapter {
     private final Viewport gameView = new FitViewport(SCREEN_WIDTH/3, SCREEN_HEIGHT/3, camera);  // viewport locked on the player
     private final GlyphLayout layout = new GlyphLayout();     // used to help with text formatting on screen
     private final ShapeRenderer shapeRenderer = new ShapeRenderer();
-    public final Player player = new Player(SCREEN_WIDTH/2, SCREEN_HEIGHT/2,
-            playerTexture.getWidth() * PLAYER_SCALE, playerTexture.getHeight() * PLAYER_SCALE, playerTexture,  PLAYER_HITBOX_SCALE);
+    public final Player player = new Player(SCREEN_WIDTH/2, SCREEN_HEIGHT/2, playerTexture.getWidth() * PLAYER_SCALE, playerTexture.getHeight() * PLAYER_SCALE, playerTexture,  PLAYER_HITBOX_SCALE);
     public static Array<Goose> geese = new Array<>();
     public static Array<Item> inventory = new Array<>(2);
     public static Array<SeedProjectile> seeds = new Array<>();
-    public final ShieldItem shield = new ShieldItem(shieldTexture, BUTTON_MARGIN + BUTTON_PADDING/2f, BUTTON_MARGIN + BUTTON_PADDING/2f,
-            ITEM_ICON_WIDTH, ITEM_ICON_HEIGHT, SHIELD_COOLDOWN, player);
-    public final HealItem heal = new HealItem(healTexture, (ITEM_ICON_WIDTH + BUTTON_PADDING + BUTTON_PADDING/2f + BUTTON_MARGIN),
-            BUTTON_MARGIN + BUTTON_PADDING/2f, ITEM_ICON_WIDTH, ITEM_ICON_HEIGHT, HEAL_COOLDOWN, player);
-    public final Goose longBoi = new Goose(STATUE_X, STATUE_Y,longBoiTexture.getWidth()*LONG_BOI_SCALE, longBoiTexture.getHeight()*LONG_BOI_SCALE,
-            longBoiTexture, player, LONG_BOI_HITBOX_SCALE);
+    public final ShieldItem shield = new ShieldItem(shieldTexture, BUTTON_MARGIN + BUTTON_PADDING/2f, BUTTON_MARGIN + BUTTON_PADDING/2f, ITEM_ICON_WIDTH, ITEM_ICON_HEIGHT, SHIELD_COOLDOWN, player);
+    public final HealItem heal = new HealItem(healTexture, (ITEM_ICON_WIDTH + BUTTON_PADDING + BUTTON_PADDING/2f + BUTTON_MARGIN), BUTTON_MARGIN + BUTTON_PADDING/2f, ITEM_ICON_WIDTH, ITEM_ICON_HEIGHT, HEAL_COOLDOWN, player);
+    public final Goose longBoi = new Goose(STATUE_X, STATUE_Y,longBoiTexture.getWidth()*LONG_BOI_SCALE, longBoiTexture.getHeight()*LONG_BOI_SCALE, longBoiTexture, player, LONG_BOI_HITBOX_SCALE);
+    public final Statue statue = new Statue(STATUE_X, STATUE_Y, statueTexture.getWidth()*STATUE_SCALE, statueTexture.getHeight()*STATUE_SCALE, statueTexture, brokenStatue, STATUE_HITBOX_SCALE);
+
+
+    // Values
+    private float seedCooldownLeft = 0;
 
 
     // Time keeping
@@ -99,13 +105,12 @@ public class GameScreen extends ScreenAdapter {
     public long elapsed_T;                    // whole seconds of play so far
     private float spawnTimer;                 // time since last goose spawned
     private float timeLeft = MAX_TIME;        // time left until the game ends
-    private float seedCooldownLeft = 0;
 
     // States
     private boolean paused = true;            // true while paused - game now starts paused
     private boolean gameOver;
     private boolean won;
-    private boolean statueBroken;
+    private boolean longboiSpawned;
 
     public GameScreen(MainGame game) {
         this.game = game;
@@ -126,13 +131,16 @@ public class GameScreen extends ScreenAdapter {
     // called when screen is set + game reset
     @Override
     public void show() {
-        statueBroken = false;
+        longboiSpawned = false;
         player.reset(SCREEN_WIDTH/2f, SCREEN_HEIGHT/2f);
         geese.clear();
         seeds.clear();
         inventory.clear();
         inventory.add(shield);
         inventory.add(heal);
+        longBoi.setDamage(LONG_BOI_DAMAGE);
+        longBoi.setSpeed(LONG_BOI_SPEED);
+        longBoi.setMaxFullness(LONG_BOI_MAX_HP);
     }
 
     // called by libGDX so when min or paused time stops
@@ -203,9 +211,18 @@ public class GameScreen extends ScreenAdapter {
             }
         }
 
+        statue.update(delta);
+
+        if (statue.isBroken() && !longboiSpawned) {
+            geese.add(longBoi);
+            longboiSpawned = true;
+        }
+
         // iterates through seed projectiles and deletes ones that are far enough away from the player
         for (int i = 0; i < seeds.size; i++) {
             SeedProjectile seed = seeds.get(i);
+
+            if (seed.overlaps(statue)) statue.hit();
 
             float distanceX = Math.abs(seed.getCenterX() - player.getCenterX());
             float distanceY = Math.abs(seed.getCenterY() - player.getCenterY());
@@ -243,7 +260,7 @@ public class GameScreen extends ScreenAdapter {
         // updates all geese
         int index = 0;
         for (Goose goose : geese) {
-            if (goose.getFullness() >= Goose.MAX_FULLNESS && !goose.Full) {
+            if (goose.getFullness() >= Goose.maxFullness && !goose.Full) {
                 goose.runawaySequence();
             }
             for (SeedProjectile seed : seeds) {
@@ -269,6 +286,7 @@ public class GameScreen extends ScreenAdapter {
 
     // ALL GameScreen drawing done here
     public void draw() {
+        // both statue forms have the same texture size
         float statueWidth = statueTexture.getWidth() * STATUE_SCALE;
         float statueHeight = statueTexture.getHeight() * STATUE_SCALE;
 
@@ -288,10 +306,7 @@ public class GameScreen extends ScreenAdapter {
         batch.draw(background, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
         // draws statue for hidden event
-        if (!statueBroken) batch.draw(statueTexture, SCREEN_WIDTH/2f - statueWidth/2f, SCREEN_HEIGHT/2f - statueHeight/2f,
-                statueWidth, statueHeight);
-        else {batch.draw(statueTexture, SCREEN_WIDTH/2f - statueWidth/2f, SCREEN_HEIGHT/2f - statueHeight/2f,
-                statueWidth, statueHeight);}
+        statue.draw(batch);
 
 
         // draws all geese
@@ -300,9 +315,9 @@ public class GameScreen extends ScreenAdapter {
         player.draw(batch);
         batch.end();
 
-//        // HIT BOX CODE //
-//        // draws hitboxes attached to camera and gameView for debugging
-//        Debugger.drawAllHitbox(seeds, player, geese, camera);
+        // HIT BOX CODE //
+        // draws hitboxes attached to camera and gameView for debugging
+        Debugger.drawAllHitbox(statue, seeds, player, geese, camera);
 
         batch.getProjectionMatrix().setToOrtho2D(0, 0, gameView.getScreenWidth(), gameView.getScreenHeight());
 
