@@ -14,8 +14,8 @@ import com.badlogic.gdx.math.Vector2;
 public class Player extends Entity{
 
     // Constants - will be changed later but just some arbitrary values for now
-    private final float SPEED = 115f;
-    private final float HIT_COOLDOWN = 1.5f;
+    private final float SPEED = 120f;
+    private final float HIT_COOLDOWN = 0.9f;
     public final float MAX_HEALTH = 10f;
     public float healingPotency;
 

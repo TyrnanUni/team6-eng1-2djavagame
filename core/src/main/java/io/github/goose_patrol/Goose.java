@@ -5,7 +5,6 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.utils.Array;
 
 /**
  * A class expressing a Goose enemy and an object. Extends Entity abstract class.
@@ -16,12 +15,8 @@ public class Goose extends Entity{
     private final float HEALTH_BAR_LENGTH = 25f;
     private final float HEALTH_BAR_HEIGHT = 4f;
     private final float HEALTH_BAR_BORDER = 1f;
-    private static final float GOOSE_SCALE = 0.5f;
-    public static final float MAX_FULLNESS = 10.0f;
-    private final float DAMAGE = 1f;
-    private final float SPEED = 90f;
     private final float RUNAWAY_SPEED = 50f;
-    private final float HIT_COOLDOWN = 1f;
+    private final float HIT_COOLDOWN = 0.6f;
     private final float DESPAWN_DIST = 200f;
 
     // Values
@@ -29,6 +24,9 @@ public class Goose extends Entity{
     public boolean Full;
     private float hitTimer;
     public boolean shouldDespawn;
+    private float damage = 1.1f;
+    private  float speed = 110f;
+    public static float maxFullness = 7.0f;
 
     // Objects
     private final Player player;
@@ -83,14 +81,14 @@ public class Goose extends Entity{
         }
         // collision detection for player
         if (this.overlaps(player)) {
-            player.hit(DAMAGE);
+            player.hit(damage);
             GooseUtil.separate(this, player);
         }
 
         // if full run faster as to get off-screen before despawning
         if (!Full) {
-            hitbox.x += velocity.x * delta * SPEED;
-            hitbox.y += velocity.y * delta * SPEED;
+            hitbox.x += velocity.x * delta * speed;
+            hitbox.y += velocity.y * delta * speed;
         }
         else {
             hitbox.x += velocity.x * delta * RUNAWAY_SPEED;
@@ -111,14 +109,14 @@ public class Goose extends Entity{
     }
 
 
-    //  - seperate from draw as needs shape renderer
+    //  - seperat from draw as needs shape renderer
     // draws the fullness bar of goose
     public void drawGooseFullnessBar(ShapeRenderer shapeRenderer) {
-        float x = this.getX() + (10f * GOOSE_SCALE);
+        float x = this.getX();
         float y = this.getY() - 5f;
 
-        if (fullness > MAX_FULLNESS) fullness = MAX_FULLNESS;
-        float fullnessRatio = fullness/MAX_FULLNESS;
+        if (fullness > maxFullness) fullness = maxFullness;
+        float fullnessRatio = fullness/ maxFullness;
 
         float innerRectX = x + HEALTH_BAR_BORDER;
         float innerRectY = y + HEALTH_BAR_BORDER;
@@ -146,7 +144,7 @@ public class Goose extends Entity{
 
     // called when goose is full
     public void runawaySequence() {
-        fullness = MAX_FULLNESS; // prevents fullness going past max and messing with the fullness bar
+        fullness = maxFullness; // prevents fullness going past max and messing with the fullness bar
         Full = true;
     }
 
@@ -162,5 +160,16 @@ public class Goose extends Entity{
     // increments fullness
     public void increaseFullness(float increase) {
         fullness += increase;
+    }
+
+    // setters
+    public void setSpeed(float newSpeed) {
+        speed = newSpeed;
+    }
+    public void setDamage(float newDamage) {
+        damage = newDamage;
+    }
+    public void setMaxFullness(float newMax) {
+        maxFullness = newMax;
     }
 }

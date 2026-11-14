@@ -35,7 +35,8 @@ public class GameScreen extends ScreenAdapter {
     private final float HEALTH_BAR_WIDTH = 500f;          // width of player health-bar
     private final float HEALTH_BAR_HEIGHT = 30f;          // height of player health-bar
     private final float GRACE = 5;                        // time before geese can spawn
-    private final float SPAWN_PERIOD = 2.5f;              // how long between each goose spawning
+    private final float SPAWN_PERIOD = 4f;                // how long between each goose spawning
+    private final float MAX_GOOSE_CLUSTER = 2f;           // max number of geese that can spawn at once
     private final int MAX_GEESE = 30;                     // maximum number of geese that can be instantiated at once
     private final float PLAYER_HITBOX_SCALE = 0.2f;       // hitbox scalers - does not affect size on screen
     private final float STATUE_HITBOX_SCALE = 0.5f;       // ^^^^^^^^^^
@@ -44,11 +45,12 @@ public class GameScreen extends ScreenAdapter {
     private final float SEED_HITBOX_SCALE = 0.2f;         // ^^^^^^^^^^
     private final float SHIELD_COOLDOWN = 10f;            // in seconds
     private final float HEAL_COOLDOWN = 10f;              // ^^^^^^^^^^
-    private final float SEED_SHOOT_COOLDOWN = 0.1f;       // ^^^^^^^^^^
+    private final float SEED_SHOOT_COOLDOWN = 0.2f;       // ^^^^^^^^^^
     private final float SEED_TRAVEL_DISTANCE = 200f;      // the distance the seed can travel from the player before being removed
-    private final float LONG_BOI_SPEED = 100f;
-    private final float LONG_BOI_DAMAGE = 2f;
-    private final float LONG_BOI_MAX_HP = 15f;
+    private final float LONG_BOI_SPEED = 112f;            // longboi's speed
+    private final float LONG_BOI_DAMAGE = 2f;             // ^^ damage
+    private final float LONG_BOI_MAX_HP = 20f;            // ^^ max fullness
+
 
     //UI Constants
     private final float ITEM_ICON_HEIGHT = 150f;          // height of items on the UI - texture stretches to fit
@@ -205,11 +207,16 @@ public class GameScreen extends ScreenAdapter {
 
             // stops at 20 geese to align with group docs (if statement runs before another goose added so prevents an extra goose spawning)
             if (spawnTimer >= SPAWN_PERIOD && geese.size < MAX_GEESE) {
-                geese.add(new Goose(x, y, gooseTexture.getWidth()*GOOSE_SCALE, gooseTexture.getHeight()*GOOSE_SCALE,
-                        gooseTexture, player, GOOSE_HITBOX_SCALE));
+                int number = (int) (Math.random()*MAX_GOOSE_CLUSTER) + 1;
+                for (int i = 0; i < number; i++) {
+                    geese.add(new Goose(x, y, gooseTexture.getWidth()*GOOSE_SCALE, gooseTexture.getHeight()*GOOSE_SCALE,
+                            gooseTexture, player, GOOSE_HITBOX_SCALE));
+                }
+
                 spawnTimer = 0;
             }
-        }
+         }
+
 
         statue.update(delta);
 
@@ -234,7 +241,7 @@ public class GameScreen extends ScreenAdapter {
         }
 
         // spawns seed projectile when left mouse clicked
-        if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT) && !paused && !gameOver && seedCooldownLeft <= 0) {
+        if (Gdx.input.isButtonPressed(Input.Buttons.LEFT) && !paused && !gameOver && seedCooldownLeft <= 0) {
             seedCooldownLeft = SEED_SHOOT_COOLDOWN;
             mouseScreenPosition.set(Gdx.input.getX(), Gdx.input.getY());
             gameView.unproject(mouseScreenPosition);
@@ -286,10 +293,6 @@ public class GameScreen extends ScreenAdapter {
 
     // ALL GameScreen drawing done here
     public void draw() {
-        // both statue forms have the same texture size
-        float statueWidth = statueTexture.getWidth() * STATUE_SCALE;
-        float statueHeight = statueTexture.getHeight() * STATUE_SCALE;
-
         // gets position of center of the game area for ease of drawing
         float XCentre = gameView.getScreenWidth() / 2f;
         float YCentre = gameView.getScreenHeight() / 2f;
@@ -315,9 +318,9 @@ public class GameScreen extends ScreenAdapter {
         player.draw(batch);
         batch.end();
 
-        // HIT BOX CODE //
-        // draws hitboxes attached to camera and gameView for debugging
-        Debugger.drawAllHitbox(statue, seeds, player, geese, camera);
+//        // HIT BOX CODE //
+//        // draws hitboxes attached to camera and gameView for debugging
+//        Debugger.drawAllHitbox(statue, seeds, player, geese, camera);
 
         batch.getProjectionMatrix().setToOrtho2D(0, 0, gameView.getScreenWidth(), gameView.getScreenHeight());
 

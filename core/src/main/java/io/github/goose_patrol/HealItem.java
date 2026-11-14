@@ -3,7 +3,8 @@ package io.github.goose_patrol;
 import com.badlogic.gdx.graphics.Texture;
 
 public class HealItem extends InitialItem{
-    public final float HEALING_POTENCY = 0.2f;
+    public final float HEALING_POTENCY = 0.6f;
+    public final float HEAL_TIMER = 3f;
     /**
      * @param texture  item texture
      * @param x        item bottom left x co-ordinate
@@ -19,6 +20,6 @@ public class HealItem extends InitialItem{
     @Override
     public void use() {
         player.setHealingPotency(HEALING_POTENCY);
-        player.setHealingTimer(5);
+        player.setHealingTimer(HEAL_TIMER);
     }
 }

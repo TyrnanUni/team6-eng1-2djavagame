@@ -4,7 +4,7 @@ import com.badlogic.gdx.graphics.Texture;
 
 public class ShieldItem extends InitialItem{
 
-    private final float shieldTime = 5f;
+    private final float shieldTime = 3f;
 
     /**
      * @param texture  item texture
@@ -20,6 +20,6 @@ public class ShieldItem extends InitialItem{
 
     @Override
     public void use() {
-        player.setShield(5);
+        player.setShield(shieldTime);
     }
 }
