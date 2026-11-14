@@ -22,6 +22,8 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 public class GameScreen extends ScreenAdapter {
 
     // Constants
+    private final float HEALTH_BAR_WIDTH = 500f;
+    private final float HEALTH_BAR_HEIGHT = 30f;
     private final float SCREEN_WIDTH = 1162f;         // width of background
     private final float SCREEN_HEIGHT = 650f;         // height of background
     private final long GRACE = 5;                     // time before geese can spawn
@@ -35,8 +37,8 @@ public class GameScreen extends ScreenAdapter {
     //UI Constants
     private final float ITEM_ICON_HEIGHT = 150f;      // height of items on the UI - texture stretches to fit
     private final float ITEM_ICON_WIDTH = 150f;       // width of items on the UI
-    private final float BUTTON_MARGIN = 15f;          // gap between buttons and screen corner
-    private final float BUTTON_PADDING = 15f;         // space between each button - used for item display
+    private final float BUTTON_MARGIN = 15f;          // gap between buttons and screen
+    private final float BUTTON_PADDING = 15f;         // space between edge of button and thing on the button
     private final int UI_FONT_SIZE = 50;
     private final int OVERLAY_FONT_SIZE = 50;
     private final int TIMER_FONT_SIZE = 100;
@@ -65,8 +67,8 @@ public class GameScreen extends ScreenAdapter {
     public final Player player = new Player(SCREEN_WIDTH/2 , SCREEN_HEIGHT/2, playerTexture, PLAYER_HITBOX_SCALE);
     public static Array<Goose> geese = new Array<>();
     public static Array<Item> inventory = new Array<>(5);
-    public final ShieldItem shield = new ShieldItem(ShieldTexture, BUTTON_MARGIN, BUTTON_MARGIN, ITEM_ICON_WIDTH, ITEM_ICON_HEIGHT, SHIELD_COOLDOWN, player);
-    public final HealItem heal = new HealItem(HealTexture, (ITEM_ICON_WIDTH+ BUTTON_MARGIN), BUTTON_MARGIN, ITEM_ICON_WIDTH, ITEM_ICON_HEIGHT, HEAL_COOLDOWN, player);
+    public final ShieldItem shield = new ShieldItem(ShieldTexture, BUTTON_MARGIN + BUTTON_PADDING/2f, BUTTON_MARGIN + BUTTON_PADDING/2f, ITEM_ICON_WIDTH, ITEM_ICON_HEIGHT, SHIELD_COOLDOWN, player);
+    public final HealItem heal = new HealItem(HealTexture, (ITEM_ICON_WIDTH + BUTTON_PADDING + BUTTON_PADDING/2f + BUTTON_MARGIN), BUTTON_MARGIN + BUTTON_PADDING/2f, ITEM_ICON_WIDTH, ITEM_ICON_HEIGHT, HEAL_COOLDOWN, player);
 
     // Time keeping
     // time is now counted with delta so it stops while the game is paused - might be some issues with keeping time on less powerful machines
@@ -81,7 +83,6 @@ public class GameScreen extends ScreenAdapter {
     private boolean gameOver;
     private boolean won;
 
-    // Constructor
     public GameScreen(MainGame game) {
         this.game = game;
         batch = game.getBatch();
@@ -90,7 +91,6 @@ public class GameScreen extends ScreenAdapter {
         overlayFont = GooseUtil.getFont(OVERLAY_FONT_COLOR, OVERLAY_FONT_SIZE);
     }
 
-    // called when window resized
     @Override
     public void resize(int width, int height) {
         if(width <= 0 || height <= 0){
@@ -99,7 +99,7 @@ public class GameScreen extends ScreenAdapter {
         gameView.update(width, height, false);
     }
 
-    // called when screen is set
+    // called when screen is set + game reset
     @Override
     public void show() {
         player.reset(SCREEN_WIDTH/2f, SCREEN_HEIGHT/2f);
@@ -135,7 +135,7 @@ public class GameScreen extends ScreenAdapter {
             update(delta);
         }
 
-        // Clamp the camera position so it stays within the map boundaries
+        // Clamps the camera position so it stays within the map boundaries
         float clampedX = com.badlogic.gdx.math.MathUtils.clamp(
                 player.getX() + player.getWidth() / 2f,
                 gameView.getWorldWidth()/2f,
@@ -154,9 +154,7 @@ public class GameScreen extends ScreenAdapter {
         draw();
     }
 
-    // contains:
-    // player.update()    goose.update()    playTime += delta
-    // Called while not paused - stops gameplay effectively
+    // All object time based updates done here - everything in here stops when game paused
     private void update(float delta) {
         playTime += delta;
         elapsed_T = (long) playTime;
@@ -211,7 +209,7 @@ public class GameScreen extends ScreenAdapter {
         }
     }
 
-    // draws the things on the scene
+    // ALL GameScreen drawing done here
     public void draw() {
         // gets position of center of the game area for ease of drawing
         float XCentre = gameView.getScreenWidth() / 2f;
@@ -227,12 +225,12 @@ public class GameScreen extends ScreenAdapter {
         // lowest layer rendering first //
         batch.begin();
         batch.draw(background, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-        // draws Entities
+        // draws all geese
         for (Goose goose : geese) goose.draw(batch);
         player.draw(batch);
         batch.end();
 
-        // HIT BOX CODE //
+//        // HIT BOX CODE //
 //        // draws hitboxes attached to camera and gameView for debugging
 //        Debugger.drawAllHitbox(player, geese, camera);
 
@@ -241,45 +239,44 @@ public class GameScreen extends ScreenAdapter {
 
         layout.setText(timerFont, timerStr);
 
-        Gdx.gl.glEnable(GL20.GL_BLEND);     // allows the use of alpha values - allows use of transparent shapes
+        Gdx.gl.glEnable(GL20.GL_BLEND);
+        // draws gray transparent screen for pause or game end
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         if (paused || gameOver) {
             shapeRenderer.setColor(0f, 0f, 0f, 0.6f);
             shapeRenderer.rect(0, 0, gameView.getScreenWidth(), gameView.getScreenHeight());
         }
-        shapeRenderer.setColor(Color.WHITE);
 
         // draws rectangle for items to be drawn on-top of
+        shapeRenderer.setColor(Color.WHITE);
         shapeRenderer.rect(BUTTON_MARGIN, BUTTON_MARGIN,
-                (ITEM_ICON_WIDTH * inventory.size),
-                ITEM_ICON_HEIGHT);
+                (ITEM_ICON_WIDTH * inventory.size) + (BUTTON_PADDING*inventory.size),
+                ITEM_ICON_HEIGHT + BUTTON_PADDING);
 
         // draws rectangle for timer to be drawn on-top of
-        shapeRenderer.rect(XCentre - layout.width/2f, gameView.getScreenHeight() - layout.height - BUTTON_MARGIN*2, layout.width + BUTTON_PADDING, layout.height + BUTTON_PADDING);
-        if (!gameOver) {
-            //draws pause button
-            if (paused) layout.setText(UIFont, "PAUSED");
-            else {layout.setText(UIFont, "Q/ESC TO PAUSE");}
+        shapeRenderer.rect(XCentre - layout.width/2f + BUTTON_PADDING/2f, gameView.getScreenHeight() - layout.height - BUTTON_MARGIN - BUTTON_PADDING/2f,
+                layout.width + BUTTON_PADDING, layout.height + BUTTON_PADDING);
 
-            shapeRenderer.rect(gameView.getScreenWidth() - layout.width - BUTTON_MARGIN - BUTTON_PADDING*2,
-                    gameView.getScreenHeight() - layout.height - BUTTON_MARGIN - BUTTON_PADDING*2,
-                    layout.width + BUTTON_PADDING*2, layout.height + BUTTON_PADDING*2);
-        }
 
-        // health squares instead of string. disappear left to right
-        float squareSize = 30f;
-        float squareGap = 10f;
-        int maxSquares = (int) player.MAX_HEALTH;
-        float squaresWidth = maxSquares * squareSize + (maxSquares - 1) * squareGap;
-        float squaresStartX = XCentre - squaresWidth / 2f;
-        int squaresLeft = (int) Math.ceil(player.getHealth());
+        // Health panel + red health bar
+        shapeRenderer.rect(XCentre - HEALTH_BAR_WIDTH/2f, BUTTON_MARGIN,
+                HEALTH_BAR_WIDTH + BUTTON_PADDING, HEALTH_BAR_HEIGHT + BUTTON_PADDING);
 
-        shapeRenderer.setColor(Color.RED);
-        for (int i = 0; i < squaresLeft; i++) {
-            float squareX = squaresStartX + i * (squareSize + squareGap);
-            shapeRenderer.rect(squareX, BUTTON_MARGIN, squareSize, squareSize);
-        }
+        shapeRenderer.setColor(Color.GRAY);
+        shapeRenderer.rect(XCentre - HEALTH_BAR_WIDTH/2f + BUTTON_PADDING/2f, BUTTON_MARGIN + BUTTON_PADDING/2f,
+                HEALTH_BAR_WIDTH , HEALTH_BAR_HEIGHT);
 
+        // colors health-bar for item used - shielding takes priority
+        if (player.isShielded()) shapeRenderer.setColor(Color.BLUE);
+        else if (player.isHealing()) shapeRenderer.setColor(Color.GREEN);
+        else{ shapeRenderer.setColor(Color.RED); }
+
+        // bar moves so the player knows when they are healing - doesn't need to rely on color alone
+        shapeRenderer.rect(XCentre - HEALTH_BAR_WIDTH/2f + BUTTON_PADDING/2f, BUTTON_MARGIN + BUTTON_PADDING/2f,
+                HEALTH_BAR_WIDTH * (player.getHealth()/player.MAX_HEALTH), HEALTH_BAR_HEIGHT);
+
+
+        // draws cooldown slider on items
         shapeRenderer.setColor(0f, 0f, 0f, 0.6f);
         for (Item item : inventory) {
             float cooldownLeft = item.cooldownLeft;
@@ -289,12 +286,10 @@ public class GameScreen extends ScreenAdapter {
             }
             else{ shapeRenderer.rect(item.getX(), item.getY(), item.getWidth(), cooldownLeft/cooldown * item.getHeight());}
         }
-
         shapeRenderer.end();
         Gdx.gl.glDisable(GL20.GL_BLEND);
 
-
-        // top layer batch render //
+        // top most layer drawing //
         batch.setProjectionMatrix(shapeRenderer.getProjectionMatrix());
         batch.begin();
 
@@ -304,19 +299,8 @@ public class GameScreen extends ScreenAdapter {
         // timer text
         layout.setText(timerFont, timerStr);
         timerFont.draw(batch, layout,
-                XCentre - layout.width/2 + BUTTON_PADDING/2, gameView.getScreenHeight() - BUTTON_PADDING*1.5f);
+                XCentre - layout.width/2f + BUTTON_PADDING, gameView.getScreenHeight() - BUTTON_MARGIN);
 
-        // pause button label
-        if (!gameOver) {
-            if (paused) {
-                layout.setText(UIFont, "PAUSED");
-            } else {
-                layout.setText(UIFont, "Q/ESC to PAUSE");
-            }
-            UIFont.draw(batch, layout,
-                gameView.getScreenWidth() - layout.width - BUTTON_MARGIN - BUTTON_PADDING,
-                gameView.getScreenHeight() - BUTTON_MARGIN - BUTTON_PADDING);
-        }
 
         // GameOver / win screen
         if (gameOver) {

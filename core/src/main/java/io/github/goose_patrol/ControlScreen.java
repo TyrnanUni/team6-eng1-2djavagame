@@ -65,6 +65,12 @@ public class ControlScreen extends ScreenAdapter {
         // gets pos of centre of the screen
         float XCentre = viewport.getWorldWidth() / 2;
         float YCentre = viewport.getWorldHeight() / 2;
+
+        // pos of controls sprite
+        float Control_sprite_X = XCentre - 200;
+        float Control_sprite_Y = YCentre - 155;
+
+        // y pos of text
         float y = YCentre + 190;
 
         // Draws control scheme help on screen
@@ -95,11 +101,14 @@ public class ControlScreen extends ScreenAdapter {
         layout.setText(font, "2 - Use 2nd item");
         font.draw(batch,layout, XCentre + 80, y);
         y -= lineSpacing;
+        layout.setText(font, "R - Restart game");
+        font.draw(batch,layout, XCentre + 80, y);
+        y -= lineSpacing;
         layout.setText(font, "Esc / Q - Pause / Play");
         font.draw(batch,layout, XCentre + 80, y);
         y -= lineSpacing;
 
-        controls.setPosition(XCentre - 200, YCentre - 120);
+        controls.setPosition(Control_sprite_X, Control_sprite_Y);
         controls.draw(batch);
         y -= lineSpacing * 2;
 

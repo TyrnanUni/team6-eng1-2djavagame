@@ -73,6 +73,7 @@ public class Player extends Entity{
                 health += healingPotency * delta;
             }
         }
+        if (health < 0f) health = 0f;
     }
 
     public void hit(float damage) {
@@ -150,13 +151,19 @@ public class Player extends Entity{
 
     public float getWidth() { return texture.getWidth() * PLAYER_SCALE; }
 
+    public boolean isShielded() { return shield > 0;}
+
+    public boolean isHealing() { return healingTimer > 0;}
+
     // setters
     public void setShield(float time) {
         shield = time;
     }
+
     public void setHealingTimer(float time) {
         healingTimer = time;
     }
+
     public void setHealingPotency(float potency) {
         healingPotency = potency;
     }
