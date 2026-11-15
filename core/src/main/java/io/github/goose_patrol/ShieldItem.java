@@ -21,5 +21,6 @@ public class ShieldItem extends InitialItem{
     @Override
     public void use() {
         player.setShield(shieldTime);
+        GameScreen.incrementTriggered();
     }
 }

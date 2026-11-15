@@ -43,8 +43,8 @@ public class GameScreen extends ScreenAdapter {
     private final float GOOSE_HITBOX_SCALE = 0.3f;        // ^^^^^^^^^^
     private final float LONG_BOI_HITBOX_SCALE = 0.55f;    // ^^^^^^^^^^
     private final float SEED_HITBOX_SCALE = 0.2f;         // ^^^^^^^^^^
-    private final float SHIELD_COOLDOWN = 10f;            // in seconds
-    private final float HEAL_COOLDOWN = 10f;              // ^^^^^^^^^^
+    private final float SHIELD_COOLDOWN = 9f;            // in seconds
+    private final float HEAL_COOLDOWN = 15f;              // ^^^^^^^^^^
     private final float SEED_SHOOT_COOLDOWN = 0.2f;       // ^^^^^^^^^^
     private final float SEED_TRAVEL_DISTANCE = 200f;      // the distance the seed can travel from the player before being removed
     private final float LONG_BOI_SPEED = 112f;            // longboi's speed
@@ -98,6 +98,7 @@ public class GameScreen extends ScreenAdapter {
 
     // Values
     private float seedCooldownLeft = 0;
+    private static int triggered;
     private float sinceLastLongboi;
 
 
@@ -147,6 +148,7 @@ public class GameScreen extends ScreenAdapter {
     // called when screen is set + game reset
     @Override
     public void show() {
+        triggered = 0;
         sinceLastLongboi = 0f;
         player.reset(SCREEN_WIDTH/2f, SCREEN_HEIGHT/2f);
         geese.clear();
@@ -231,8 +233,7 @@ public class GameScreen extends ScreenAdapter {
             }
          }
 
-
-        statue.update(delta);
+        if (!statue.isBroken()) statue.update(delta);
 
 
         // iterates through seed projectiles and deletes ones that are far enough away from the player
@@ -353,17 +354,20 @@ public class GameScreen extends ScreenAdapter {
             shapeRenderer.rect(0, 0, gameView.getScreenWidth(), gameView.getScreenHeight());
         }
 
-
         // draws rectangle for items to be drawn on-top of
         shapeRenderer.setColor(Color.WHITE);
         shapeRenderer.rect(BUTTON_MARGIN, BUTTON_MARGIN,
                 (ITEM_ICON_WIDTH * inventory.size) + (BUTTON_PADDING*inventory.size),
                 ITEM_ICON_HEIGHT + BUTTON_PADDING);
 
+        // draws rectangle for item+event counter to sit on
+        layout.setText(UIFont, "EVENT+ITEM\nCOUNT: " + triggered);
+        shapeRenderer.rect(BUTTON_MARGIN, BUTTON_MARGIN + BUTTON_PADDING + ITEM_ICON_HEIGHT,
+                layout.width + BUTTON_PADDING, layout.height + BUTTON_PADDING);
+
         // draws rectangle for timer to be drawn on-top of
         shapeRenderer.rect(XCentre - layout.width/2f + BUTTON_PADDING/2f, gameView.getScreenHeight() - layout.height - BUTTON_MARGIN - BUTTON_PADDING/2f,
                 layout.width + BUTTON_PADDING, layout.height + BUTTON_PADDING);
-
 
         // Health panel + red health bar
         shapeRenderer.rect(XCentre - HEALTH_BAR_WIDTH/2f, BUTTON_MARGIN,
@@ -408,6 +412,10 @@ public class GameScreen extends ScreenAdapter {
         timerFont.draw(batch, layout,
                 XCentre - layout.width/2f + BUTTON_PADDING, gameView.getScreenHeight() - BUTTON_MARGIN);
 
+        // event + item trigger count
+        layout.setText(UIFont, "EVENT+ITEM\nCOUNT: " + triggered);
+        UIFont.draw(batch, layout,
+                BUTTON_MARGIN + BUTTON_PADDING/2f, BUTTON_MARGIN + ITEM_ICON_HEIGHT + layout.height + BUTTON_PADDING);
 
         // GameOver / win screen
         if (gameOver) {
@@ -456,6 +464,11 @@ public class GameScreen extends ScreenAdapter {
     public void GameOver(boolean playerWon) {
         gameOver = true;
         won = playerWon;
+    }
+
+    // increment item+events triggered
+    public static void incrementTriggered() {
+        triggered++;
     }
 
     // called to pause / unpause the game - stops timer and game movement while paused

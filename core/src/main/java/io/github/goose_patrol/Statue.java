@@ -40,6 +40,7 @@ public class Statue extends Entity{
         if (statueIntegreity <= 0) {
             setTexture(brokenTexture);
             Broken = true;
+            GameScreen.incrementTriggered(); // only triggers once as statue stops updating when broken
         }
     }
 

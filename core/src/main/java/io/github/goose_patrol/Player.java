@@ -17,7 +17,7 @@ public class Player extends Entity{
     private final float SPEED = 120f;
     private final float HIT_COOLDOWN = 0.9f;
     public final float MAX_HEALTH = 10f;
-    public float healingPotency;
+    private final float DOUBLE_ITEM_BENEFIT_SCALER = 2f;
 
     // Values
     private int hits;
@@ -25,10 +25,15 @@ public class Player extends Entity{
     private float hitTimer;
     private float healingTimer;
     private float shield;
+    public float healingPotency;
+    private float colorTimer;
 
 
     //Objects
     public final Vector2 velocity = new Vector2();
+
+    // States
+    private boolean usedBothItems;
 
     /**
      * Constructor
@@ -52,6 +57,31 @@ public class Player extends Entity{
         hitTimer = 0;
         shield = 0;
         healingTimer = 0;
+        usedBothItems = false;
+    }
+
+    // healing is now multiplied by DOUBLE_ITEWM_BENEFIT_SCALER
+    public void bothItemsAtOnce(float delta) {
+        if (!usedBothItems) {
+            usedBothItems = true;
+            GameScreen.incrementTriggered();
+        }
+        shield -= delta;
+        healingTimer -= delta;
+        if (health < MAX_HEALTH) {
+            health += healingPotency * delta * DOUBLE_ITEM_BENEFIT_SCALER;
+        }
+    }
+    // makes the player cycle through the RGB color space
+    public void specialColors(Batch batch) {
+        colorTimer += Gdx.graphics.getDeltaTime() * 60f;
+        float hue = colorTimer % 360f; // creates hue based off game uptime
+
+        Color color = new Color();     // color object
+        color.fromHsv(hue, 1f, 1f);    // HSV to RGB
+        color.a = 1f;                  // alpha from 0f to 1f
+
+        batch.setColor(color);
     }
 
     /**
@@ -63,15 +93,21 @@ public class Player extends Entity{
         Input(delta);
         if (hitTimer > 0) hitTimer -= delta;
 
-        if (shield > 0 ) {
+        if (shield > 0 && healingTimer > 0){
+            bothItemsAtOnce(delta);
+        }
+        else if (shield > 0 ) {
+            usedBothItems = false;
             shield -= delta;
         }
-        if (healingTimer > 0) {
+        else if (healingTimer > 0) {
+            usedBothItems = false;
             healingTimer -= delta;
             if (health < MAX_HEALTH) {
                 health += healingPotency * delta;
             }
         }
+
         if (health < 0f) health = 0f;
     }
 
@@ -94,16 +130,18 @@ public class Player extends Entity{
                 batch.setColor(1f, 0.6f, 0.6f, 1f);
             }
         }
-        // flashes blue when shielded
-        if (shield > 0) {
+
+        if (shield > 0 && healingTimer > 0){
+            specialColors(batch);
+        }
+        else if (shield > 0) {
             int flashStep = (int) (shield * 7);
             if (flashStep % 2 == 0) {
                 batch.setColor(0.7f, 0.7f, 1f, 1f);
             }
 
         }
-        // flashes green when healing
-        if (healingTimer > 0) {
+        else if (healingTimer > 0) {
             int flashStep = (int) (healingTimer * 7);
             if (flashStep % 2 == 0) {
                 batch.setColor(0.7f, 1f, 0.7f, 1f);
