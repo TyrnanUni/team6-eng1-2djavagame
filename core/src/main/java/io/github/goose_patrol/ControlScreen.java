@@ -17,7 +17,8 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 public class ControlScreen extends ScreenAdapter {
     private final MainGame game;
     private final Batch batch;
-    private final BitmapFont font;
+    private final BitmapFont smallFont;
+    private final BitmapFont bigFont;
     private final Viewport viewport = new ScreenViewport();
     private final GlyphLayout layout = new GlyphLayout();
 
@@ -29,9 +30,10 @@ public class ControlScreen extends ScreenAdapter {
     public ControlScreen(MainGame game) {
         this.game = game;
         batch = game.getBatch();
-        font = GooseUtil.getFont(Color.WHITE, 33);
+        bigFont = GooseUtil.getFont(Color.WHITE, 70);
+        smallFont = GooseUtil.getFont(Color.WHITE, 33);
 
-        controls.scale(1f);
+        controls.scale(1.5f);
     }
 
     @Override
@@ -67,53 +69,57 @@ public class ControlScreen extends ScreenAdapter {
         float YCentre = viewport.getWorldHeight() / 2;
 
         // pos of controls sprite
-        float Control_sprite_X = XCentre - 200;
-        float Control_sprite_Y = YCentre - 155;
+        float Control_sprite_X = XCentre - 350;
+        float Control_sprite_Y = YCentre - 50;
 
         // y pos of text
-        float y = YCentre + 190;
+        float y = YCentre + 460;
+        float x = XCentre + 200;
 
         // Draws control scheme help on screen
         int lineSpacing = 35; // line spacing to make spacing easier to change
 
-        layout.setText(font, "GOOSE PATROL"); // layout.width helps us find the center of the text
-        font.draw(batch,layout, (XCentre - (layout.width/2)), y);
-        y -= lineSpacing * 2;
+        layout.setText(bigFont, "GOOSE PATROL"); // layout.width helps us find the center of the text
+        bigFont.draw(batch,layout, (XCentre - (layout.width/2)), y);
+        y -= lineSpacing * 7;
 
-        layout.setText(font, "Controls:");
-        font.draw(batch,layout, (XCentre - (layout.width/2)), y);
-        y -= lineSpacing * 2;
-        layout.setText(font, "W / UP - Up");
-        font.draw(batch,layout, XCentre + 80, y);
+        layout.setText(smallFont, "W / UP - Up");
+        smallFont.draw(batch,layout, x, y);
         y -= lineSpacing;
-        layout.setText(font, "A / LEFT - Left");
-        font.draw(batch,layout, XCentre + 80, y);
+        layout.setText(smallFont, "A / LEFT - Left");
+        smallFont.draw(batch,layout, x, y);
         y -= lineSpacing;
-        layout.setText(font, "S / DOWN - Down");
-        font.draw(batch,layout, XCentre + 80, y);
+        layout.setText(smallFont, "S / DOWN - Down");
+        smallFont.draw(batch,layout, x, y);
         y -= lineSpacing;
-        layout.setText(font, "D / RIGHT - Right");
-        font.draw(batch,layout, XCentre + 80, y);
+        layout.setText(smallFont, "D / RIGHT - Right");
+        smallFont.draw(batch,layout, x, y);
         y -= lineSpacing;
-        layout.setText(font, "1 - Use 1st item");
-        font.draw(batch,layout, XCentre + 80, y);
+        layout.setText(smallFont, "1 - Use 1st item");
+        smallFont.draw(batch,layout, x, y);
         y -= lineSpacing;
-        layout.setText(font, "2 - Use 2nd item");
-        font.draw(batch,layout, XCentre + 80, y);
+        layout.setText(smallFont, "2 - Use 2nd item");
+        smallFont.draw(batch,layout, x, y);
         y -= lineSpacing;
-        layout.setText(font, "R - Restart game");
-        font.draw(batch,layout, XCentre + 80, y);
+        layout.setText(smallFont, "R - Restart game");
+        smallFont.draw(batch,layout, x, y);
         y -= lineSpacing;
-        layout.setText(font, "Esc / Q - Pause / Play");
-        font.draw(batch,layout, XCentre + 80, y);
+        layout.setText(smallFont, "Esc / Q - Pause / Play");
+        smallFont.draw(batch,layout, x, y);
+        y -= lineSpacing;
+        layout.setText(smallFont, "\n");
+        smallFont.draw(batch,layout, x, y);
+        y -= lineSpacing;
+        layout.setText(smallFont, "Mouse - Point and left-click\nto shoot seeds");
+        smallFont.draw(batch,layout, x, y);
         y -= lineSpacing;
 
         controls.setPosition(Control_sprite_X, Control_sprite_Y);
         controls.draw(batch);
-        y -= lineSpacing * 2;
+        y -= lineSpacing * 7;
 
-        layout.setText(font, "Press SPACE key to continue...");
-        font.draw(batch, layout, (XCentre - (layout.width/2)), y);
+        layout.setText(smallFont, "Press SPACE key to continue...");
+        smallFont.draw(batch, layout, (XCentre - (layout.width/2)), y);
 
         batch.end();
         // end of draw batch
@@ -122,7 +128,8 @@ public class ControlScreen extends ScreenAdapter {
     // clears font and WASD image from GPU
     @Override
     public void dispose() {
-        font.dispose();
+        bigFont.dispose();
+        smallFont.dispose();
         controlsTexture.dispose();
     }
 }
