@@ -72,17 +72,7 @@ public class Player extends Entity{
             health += healingPotency * delta * DOUBLE_ITEM_BENEFIT_SCALER;
         }
     }
-    // makes the player cycle through the RGB color space
-    public void specialColors(Batch batch) {
-        colorTimer += Gdx.graphics.getDeltaTime() * 60f;
-        float hue = colorTimer % 360f; // creates hue based off game uptime
 
-        Color color = new Color();     // color object
-        color.fromHsv(hue, 1f, 1f);    // HSV to RGB
-        color.a = 1f;                  // alpha from 0f to 1f
-
-        batch.setColor(color);
-    }
 
     /**
      * Updates status' of player. Input, hit cooldown etc...
@@ -132,7 +122,7 @@ public class Player extends Entity{
         }
 
         if (shield > 0 && healingTimer > 0){
-            specialColors(batch);
+            batch.setColor(GooseUtil.rainbowColors());
         }
         else if (shield > 0) {
             int flashStep = (int) (shield * 7);

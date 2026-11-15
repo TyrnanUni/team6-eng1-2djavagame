@@ -4,6 +4,7 @@ package io.github.goose_patrol;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.math.Vector2;
@@ -14,6 +15,8 @@ public class GooseUtil {
     private static final float RANGE = 240f ; // minimum range from the player that geese can spawn
     private static final float LIMIT = 80f;  // how far away from the minimum the geese can spawn,
                                               // spawning them too far away makes them not impactful and a waste of resources.
+
+    static float colorTimer = 0;
 
 
     /**
@@ -92,6 +95,21 @@ public class GooseUtil {
             target.hitbox.x += separationDir.x * (overlap * 0.5f);
             target.hitbox.y += separationDir.y * (overlap * 0.5f);
         }
+    }
+
+    /**
+     * Generates colours for rainbow efects
+     * @return Color
+     */
+    public static Color rainbowColors() {
+        colorTimer += Gdx.graphics.getDeltaTime() * 60f;
+        float hue = colorTimer % 360f; // creates hue based off game uptime
+
+        Color color = new Color();     // color object
+        color.fromHsv(hue, 1f, 1f);    // HSV to RGB
+        color.a = 1f;                  // alpha from 0f to 1f
+
+        return color;
     }
 
 

@@ -331,12 +331,7 @@ public class GameScreen extends ScreenAdapter {
         player.draw(batch);
         batch.end();
 
-//        // HIT BOX CODE //
-//        // draws hitboxes attached to camera and gameView for debugging
-//        Debugger.drawAllHitbox(statue, seeds, player, geese, camera);
-
         batch.getProjectionMatrix().setToOrtho2D(0, 0, gameView.getScreenWidth(), gameView.getScreenHeight());
-
 
         layout.setText(timerFont, timerStr);
 
@@ -374,13 +369,13 @@ public class GameScreen extends ScreenAdapter {
         // Health panel + red health bar
         shapeRenderer.rect(XCentre - HEALTH_BAR_WIDTH/2f, BUTTON_MARGIN,
                 HEALTH_BAR_WIDTH + BUTTON_PADDING, HEALTH_BAR_HEIGHT + BUTTON_PADDING);
-
         shapeRenderer.setColor(Color.GRAY);
         shapeRenderer.rect(XCentre - HEALTH_BAR_WIDTH/2f + BUTTON_PADDING/2f, BUTTON_MARGIN + BUTTON_PADDING/2f,
                 HEALTH_BAR_WIDTH , HEALTH_BAR_HEIGHT);
 
         // colors health-bar for item used - shielding takes priority
-        if (player.isShielded()) shapeRenderer.setColor(Color.BLUE);
+        if (player.isShielded() && player.isHealing()) shapeRenderer.setColor(GooseUtil.rainbowColors());
+        else if (player.isShielded()) shapeRenderer.setColor(Color.BLUE);
         else if (player.isHealing()) shapeRenderer.setColor(Color.GREEN);
         else{ shapeRenderer.setColor(Color.RED); }
 
