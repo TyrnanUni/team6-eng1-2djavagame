@@ -20,6 +20,8 @@ public class Goose extends Entity{
     private final float DESPAWN_DIST = 200f;
 
     // Values
+    private final Texture flipped;
+    private final Texture normal;
     private float fullness;
     public boolean Full;
     private float hitTimer;
@@ -39,9 +41,11 @@ public class Goose extends Entity{
      * @param texture enemy texture
      * @param player player object tied to the enemies
      */
-    public Goose(float x, float y, float w, float h, Texture texture, Player player, float HITBOX_SCALE) {
+    public Goose(float x, float y, float w, float h, Texture texture, Texture flipped, Player player, float HITBOX_SCALE) {
         super(x, y, w, h, texture, HITBOX_SCALE);
         this.player = player;
+        this.flipped = flipped;
+        normal = texture;
         fullness = 0;
         Full = false;
         hitTimer = 0;
@@ -84,6 +88,11 @@ public class Goose extends Entity{
             player.hit(damage);
             GooseUtil.separate(this, player);
         }
+
+        // flips texture based on velocity
+        if (velocity.x > 0 && !(texture == flipped)) setTexture(flipped);
+        else if (velocity.x < 0 && (texture == flipped)) setTexture(normal);
+
 
         // if full run faster as to get off-screen before despawning
         if (!Full) {

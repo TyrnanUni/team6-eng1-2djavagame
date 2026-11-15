@@ -68,12 +68,14 @@ public class GameScreen extends ScreenAdapter {
     //Assets
     private final Texture playerTexture = new Texture("Student_Forward.png");
     private final Texture gooseTexture = new Texture("Goose.png");
+    private final Texture flippedGooseTexture = new Texture("flipped_Goose.png");
     private final Texture background = new Texture("Campus_Background.png");
     private final Texture shieldTexture = new Texture("Shield.png");
     private final Texture healTexture = new Texture("Heal.png");
     private final Texture seedTexture = new Texture("SEED.png");
     private final Texture statueTexture = new Texture("LONG_BOI_STATUE.png");
     private final Texture longBoiTexture = new Texture("Long_Boi.png");
+    private final Texture flippedLonboiTexture = new Texture("flipped_Long_Boi.png");
     private final Texture brokenStatue = new Texture("Broken_Statue.png");
 
     // Objects
@@ -129,7 +131,7 @@ public class GameScreen extends ScreenAdapter {
             sinceLastLongboi = LONG_BOI_SPAWN_INTERVAL;
             Goose longBoi = new Goose(STATUE_X, STATUE_Y,
                     longBoiTexture.getWidth()*LONG_BOI_SCALE, longBoiTexture.getHeight()*LONG_BOI_SCALE,
-                    longBoiTexture, player, LONG_BOI_HITBOX_SCALE);
+                    longBoiTexture, flippedLonboiTexture, player,  LONG_BOI_HITBOX_SCALE);
             longBoi.setDamage(LONG_BOI_DAMAGE);
             longBoi.setSpeed(LONG_BOI_SPEED);
             longBoi.setMaxFullness(LONG_BOI_MAX_HP);
@@ -226,7 +228,7 @@ public class GameScreen extends ScreenAdapter {
                 int number = (int) (Math.random()*MAX_GOOSE_CLUSTER) + 1;
                 for (int i = 0; i < number; i++) {
                     geese.add(new Goose(x, y, gooseTexture.getWidth()*GOOSE_SCALE, gooseTexture.getHeight()*GOOSE_SCALE,
-                            gooseTexture, player, GOOSE_HITBOX_SCALE));
+                            gooseTexture, flippedGooseTexture, player, GOOSE_HITBOX_SCALE));
                 }
 
                 spawnTimer = 0;
