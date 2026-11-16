@@ -1,2 +1,5 @@
-# team6-eng1-2djavagame
-2D java game for Eng1 Group 6
+# Team 6's Goose Patrol Game
+Nice to knows:
+- index contains html for the website
+- docs contains pdfs for the website, these pdfs explain our architecture.
+- Everything else is to do with the game project itself.
