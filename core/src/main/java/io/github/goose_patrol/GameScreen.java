@@ -99,6 +99,8 @@ public class GameScreen extends ScreenAdapter {
 
 
     // Values
+    float XCentre;       // middle of viewport for ease of UI drawing
+    float YCentre;
     private float seedCooldownLeft = 0;
     private static int triggered;
     private float sinceLastLongboi;
@@ -106,11 +108,12 @@ public class GameScreen extends ScreenAdapter {
 
     // Time keeping
     // time is now counted with delta so it stops while the game is paused - might be some issues with keeping time on less powerful machines
-    private final int MAX_TIME = 300;        // max time for game in seconds
+    private final int MAX_TIME = 300;         // max time for game in seconds
     private float playTime;                   // seconds of un-paused play so far
     public long elapsed_T;                    // whole seconds of play so far
     private float spawnTimer;                 // time since last goose spawned
     private float timeLeft = MAX_TIME;        // time left until the game ends
+    private String timerStr;                  // string format for timeLeft
 
     // States
     private boolean paused = true;            // true while paused - game now starts paused
@@ -147,7 +150,9 @@ public class GameScreen extends ScreenAdapter {
         gameView.update(width, height, false);
     }
 
-    // called when screen is set + game reset
+    /**
+     * Called when game resets or first called
+     */
     @Override
     public void show() {
         triggered = 0;
@@ -160,13 +165,18 @@ public class GameScreen extends ScreenAdapter {
         inventory.add(heal);
     }
 
-    // called by libGDX so when min or paused time stops
+    /**
+     * Called when window minimized
+     */
     @Override
     public void pause() {
         paused = true;
     }
 
-    // loops while this active screen
+    /**
+     * Called continually while GameScreen is the active screen
+     * @param delta The time in seconds since the last render.
+     */
     @Override
     public void render(float delta) {
         ScreenUtils.clear(Color.BLACK);
@@ -177,11 +187,10 @@ public class GameScreen extends ScreenAdapter {
                 return;
             }
         }
-
-        // toggle pause
         else if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) || Gdx.input.isKeyJustPressed(Input.Keys.Q)) {
             GamePause();
         }
+
         if (!paused && !gameOver) {
             update(delta);
         }
@@ -191,7 +200,6 @@ public class GameScreen extends ScreenAdapter {
                 player.getX() + player.getWidth() / 2f,
                 gameView.getWorldWidth()/2f,
                 SCREEN_WIDTH - gameView.getWorldWidth()/2f);
-
         float clampedY = com.badlogic.gdx.math.MathUtils.clamp(
                 player.getY() + player.getHeight() / 2f,
                 gameView.getWorldHeight()/2f,
@@ -205,38 +213,37 @@ public class GameScreen extends ScreenAdapter {
         draw();
     }
 
-    // All object time based updates done here - everything in here stops when game paused
+    /**
+     * Does all updating of entities and some logic to go along with updates
+     * @param delta time since last render call
+     */
     private void update(float delta) {
+        // updating time keeping
         playTime += delta;
         elapsed_T = (long) playTime;
         timeLeft = MAX_TIME - playTime;
         if (seedCooldownLeft > 0) seedCooldownLeft -= delta;
         if (sinceLastLongboi > 0) sinceLastLongboi -= delta;
 
-        longboiSpawner();
+        longboiSpawner(); // checks if longboi should be added to geese
 
         // spawn geese in every {SPAWN PERIOD} seconds
-        // continually drawn unless 'dispersed'
         spawnTimer += delta;
         if (elapsed_T >= GRACE) {
-            // gets random spawn-point for each new goose
             float x = GooseUtil.getEnemySpawnX(player);
             float y = GooseUtil.getEnemySpawnY(player);
 
-            // stops at 20 geese to align with group docs (if statement runs before another goose added so prevents an extra goose spawning)
             if (spawnTimer >= SPAWN_PERIOD && geese.size < MAX_GEESE) {
                 int number = (int) (Math.random()*MAX_GOOSE_CLUSTER) + 1;
                 for (int i = 0; i < number; i++) {
                     geese.add(new Goose(x, y, gooseTexture.getWidth()*GOOSE_SCALE, gooseTexture.getHeight()*GOOSE_SCALE,
                             gooseTexture, flippedGooseTexture, player, GOOSE_HITBOX_SCALE));
                 }
-
                 spawnTimer = 0;
             }
          }
 
         if (!statue.isBroken()) statue.update(delta);
-
 
         // iterates through seed projectiles and deletes ones that are far enough away from the player
         for (int i = 0; i < seeds.size; i++) {
@@ -250,7 +257,6 @@ public class GameScreen extends ScreenAdapter {
             if (distanceX > SEED_TRAVEL_DISTANCE || distanceY > SEED_TRAVEL_DISTANCE ) {
                 seeds.removeIndex(i);
             }
-
         }
 
         // spawns seed projectile when left mouse clicked
@@ -267,8 +273,6 @@ public class GameScreen extends ScreenAdapter {
                     seedTexture, SEED_HITBOX_SCALE, direction));
         }
 
-
-
         // iterates through items whilst checking their index against the number pressed
         int count = 0;
         for (Item item : inventory) {
@@ -283,6 +287,7 @@ public class GameScreen extends ScreenAdapter {
             if (goose.getFullness() >= Goose.maxFullness && !goose.Full) {
                 goose.runawaySequence();
             }
+            if (goose.overlaps(statue)) {GooseUtil.separate(goose, statue);}
             for (SeedProjectile seed : seeds) {
                 if (goose.overlaps(seed)) goose.hit(seed);
             }
@@ -291,11 +296,13 @@ public class GameScreen extends ScreenAdapter {
             index ++;
         }
 
-        for (SeedProjectile seed : seeds) seed.update(delta);
+        if (player.overlaps(statue)) {GooseUtil.separate(player, statue);}
 
-        player.update(delta); // updates player status - pos, hit cooldown etc...
-        player.keepInside(SCREEN_WIDTH, SCREEN_HEIGHT); // map edges act as walls
+        for (SeedProjectile seed : seeds) seed.update(delta);        // updates seeds
+        player.update(delta);                                        // updates player status
+        player.keepInside(SCREEN_WIDTH, SCREEN_HEIGHT);              // makes sure player in bounds
 
+        // checks if lose or win
         if (player.getHealth() <= 0) {
             GameOver(false);
         } else if (timeLeft <= 0) {
@@ -304,141 +311,137 @@ public class GameScreen extends ScreenAdapter {
         }
     }
 
-    // ALL GameScreen drawing done here
-    public void draw() {
-        // gets position of center of the game area for ease of drawing
-        float XCentre = gameView.getScreenWidth() / 2f;
-        float YCentre = gameView.getScreenHeight() / 2f;
 
-        // time formating
+    /**
+     * Draws all of GameScreen
+     */
+    public void draw() {
+        XCentre = gameView.getScreenWidth()/2f;
+        YCentre = gameView.getScreenHeight()/2f;
+
+        // ------ Time formatting -------//
         int minutesLeft = (int) Math.ceil(timeLeft) / 60;
         int secondsLeft = (int) Math.ceil(timeLeft) % 60;
-        String timerStr = String.format("%d:%02d", minutesLeft, secondsLeft);
-
+        timerStr = String.format("%d:%02d", minutesLeft, secondsLeft);
         gameView.apply();
 
-        // lowest layer rendering first //
+        // ----- Entities + Background -----//
         batch.begin();
-        batch.draw(background, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-
-        // draws statue for hidden event
-        statue.draw(batch);
-
-
-        // draws all geese
-        for (Goose goose : geese) goose.draw(batch);
-        for (SeedProjectile seed : seeds) seed.draw(batch);
-        player.draw(batch);
+        batch.draw(background, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);  // background texture
+        statue.draw(batch);                                         // draw statue
+        for (Goose goose : geese) goose.draw(batch);                // draw all geese
+        for (SeedProjectile seed : seeds) seed.draw(batch);         // draw all seeds
+        player.draw(batch);                                         // draw player
         batch.end();
 
+        // getting projection to whole world
         batch.getProjectionMatrix().setToOrtho2D(0, 0, gameView.getScreenWidth(), gameView.getScreenHeight());
 
-        layout.setText(timerFont, timerStr);
-
-        Gdx.gl.glEnable(GL20.GL_BLEND);
-        // draws gray transparent screen for pause or game end
+        // ---------- None-UI shapes ----------//
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        // setting to draw world shapes
         shapeRenderer.setProjectionMatrix(camera.combined);
+        for (Goose goose : geese) { goose.drawGooseFullnessBar(shapeRenderer); }
+        shapeRenderer.end();
 
-        // draws geese health-bar
-        for (Goose goose : geese) {
-            goose.drawGooseFullnessBar(shapeRenderer);
-        }
+        // -------- UI Shapes + batch ---------//
+        shapeRenderer.setProjectionMatrix(batch.getProjectionMatrix()); // reset projection for UI
 
-        shapeRenderer.setProjectionMatrix(batch.getProjectionMatrix());
+        drawUI();
+
+        // -------- Pause/game-over overlay------//
         if (paused || gameOver) {
+            Gdx.gl.glEnable(GL20.GL_BLEND);
+            shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
             shapeRenderer.setColor(0f, 0f, 0f, 0.6f);
             shapeRenderer.rect(0, 0, gameView.getScreenWidth(), gameView.getScreenHeight());
-        }
+            shapeRenderer.end();
+            Gdx.gl.glDisable(GL20.GL_BLEND);
 
-        // draws rectangle for items to be drawn on-top of
+            // text
+            batch.begin();
+            if (gameOver) {
+                String title;
+                String message;
+                if (won) {
+                    title = "YOU WIN!";
+                    message = "You survived the geese";
+                } else {
+                    title = "GAME OVER";
+                    message = "The geese caught you " + player.getHits() + " times";
+                }
+                layout.setText(overlayFont, title);
+                overlayFont.draw(batch, layout, XCentre - layout.width/2f, YCentre + layout.height * 2);
+                layout.setText(overlayFont, message);
+                overlayFont.draw(batch, layout, XCentre - layout.width/2f, YCentre);
+                layout.setText(overlayFont, "Press R to play again");
+                overlayFont.draw(batch, layout, XCentre - layout.width/2f, YCentre - layout.height * 2);
+            }
+            else if (paused) {
+                layout.setText(overlayFont, "PAUSED");
+                overlayFont.draw(batch, layout, XCentre - layout.width/2f, YCentre + layout.height);
+                layout.setText(overlayFont, "Press Q or ESC to RESUME..");
+                overlayFont.draw(batch, layout, XCentre - layout.width/2f, YCentre - layout.height);
+            }
+            batch.end();
+        }
+    }
+
+    /**
+     * UI portion of Draw so things are ordered properly on screen
+     */
+    public void drawUI() {
+        // ------- white UI rectangles ------//
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         shapeRenderer.setColor(Color.WHITE);
+        // draws item rectangle
         shapeRenderer.rect(BUTTON_MARGIN, BUTTON_MARGIN,
                 (ITEM_ICON_WIDTH * inventory.size) + (BUTTON_PADDING*inventory.size),
                 ITEM_ICON_HEIGHT + BUTTON_PADDING);
-
-        // draws rectangle for item+event counter to sit on
+        // draws item + event counter rectangle
         layout.setText(UIFont, "EVENT+ITEM\nCOUNT: " + triggered);
         shapeRenderer.rect(BUTTON_MARGIN, BUTTON_MARGIN + BUTTON_PADDING + ITEM_ICON_HEIGHT,
                 layout.width + BUTTON_PADDING, layout.height + BUTTON_PADDING);
-
-        // draws rectangle for timer to be drawn on-top of
+        // draws timer rectangle
+        layout.setText(timerFont, timerStr);
         shapeRenderer.rect(XCentre - layout.width/2f + BUTTON_PADDING/2f, gameView.getScreenHeight() - layout.height - BUTTON_MARGIN - BUTTON_PADDING/2f,
                 layout.width + BUTTON_PADDING, layout.height + BUTTON_PADDING);
-
-        // Health panel + red health bar
+        // draws health bar backing rectangle
         shapeRenderer.rect(XCentre - HEALTH_BAR_WIDTH/2f, BUTTON_MARGIN,
                 HEALTH_BAR_WIDTH + BUTTON_PADDING, HEALTH_BAR_HEIGHT + BUTTON_PADDING);
+
+
+        // ---- Other none-white UI shapes ----//
         shapeRenderer.setColor(Color.GRAY);
         shapeRenderer.rect(XCentre - HEALTH_BAR_WIDTH/2f + BUTTON_PADDING/2f, BUTTON_MARGIN + BUTTON_PADDING/2f,
                 HEALTH_BAR_WIDTH , HEALTH_BAR_HEIGHT);
-
-        // colors health-bar for item used - shielding takes priority
+        // sets health bar color based on player state
         if (player.isShielded() && player.isHealing()) shapeRenderer.setColor(GooseUtil.rainbowColors());
         else if (player.isShielded()) shapeRenderer.setColor(Color.BLUE);
         else if (player.isHealing()) shapeRenderer.setColor(Color.GREEN);
         else{ shapeRenderer.setColor(Color.RED); }
-
-        // bar moves so the player knows when they are healing - doesn't need to rely on color alone
+        // draws health bar
         shapeRenderer.rect(XCentre - HEALTH_BAR_WIDTH/2f + BUTTON_PADDING/2f, BUTTON_MARGIN + BUTTON_PADDING/2f,
                 HEALTH_BAR_WIDTH * (player.getHealth()/player.MAX_HEALTH), HEALTH_BAR_HEIGHT);
 
 
-        // draws cooldown slider on items
-        shapeRenderer.setColor(0f, 0f, 0f, 0.6f);
-        for (Item item : inventory) {
-            float cooldownLeft = item.cooldownLeft;
-            float cooldown = item.COOLDOWN;
-            if (cooldownLeft <= 0) {
-                continue;
-            }
-            else{ shapeRenderer.rect(item.getX(), item.getY(), item.getWidth(), cooldownLeft/cooldown * item.getHeight());}
-        }
         shapeRenderer.end();
-        Gdx.gl.glDisable(GL20.GL_BLEND);
-
-        // top most layer drawing //
         batch.setProjectionMatrix(shapeRenderer.getProjectionMatrix());
+
+
+        // --------- Text + inventory items --------//
         batch.begin();
-
-        // item textures drawn
-        for (Item item : inventory) item.draw(batch);
-
+        for (Item item : inventory) item.draw(batch); // draw items in inventory
         // timer text
         layout.setText(timerFont, timerStr);
         timerFont.draw(batch, layout,
-                XCentre - layout.width/2f + BUTTON_PADDING, gameView.getScreenHeight() - BUTTON_MARGIN);
-
+                XCentre - layout.width/2f + BUTTON_PADDING,
+                gameView.getScreenHeight() - BUTTON_MARGIN);
         // event + item trigger count
         layout.setText(UIFont, "EVENT+ITEM\nCOUNT: " + triggered);
         UIFont.draw(batch, layout,
-                BUTTON_MARGIN + BUTTON_PADDING/2f, BUTTON_MARGIN + ITEM_ICON_HEIGHT + layout.height + BUTTON_PADDING);
-
-        // GameOver / win screen
-        if (gameOver) {
-            String title;
-            String message;
-            if (won) {
-                title = "YOU WIN!";
-                message = "You survived the geese";
-            } else {
-                title = "GAME OVER";
-                message = "The geese caught you " + player.getHits() + " times";
-            }
-            layout.setText(overlayFont, title);
-            overlayFont.draw(batch, layout, XCentre - layout.width/2f, YCentre + layout.height * 2);
-            layout.setText(overlayFont, message);
-            overlayFont.draw(batch, layout, XCentre - layout.width/2f, YCentre);
-            layout.setText(overlayFont, "Press R to play again");
-            overlayFont.draw(batch, layout, XCentre - layout.width/2f, YCentre - layout.height * 2);
-        }
-        // pause overlay text
-        else if (paused) {
-            layout.setText(overlayFont, "PAUSED");
-            overlayFont.draw(batch, layout, XCentre - layout.width/2f, YCentre + layout.height);
-            layout.setText(overlayFont, "Press Q or ESC to RESUME..");
-            overlayFont.draw(batch, layout, XCentre - layout.width/2f, YCentre - layout.height);
-        }
+                BUTTON_MARGIN + BUTTON_PADDING/2f,
+                BUTTON_MARGIN + ITEM_ICON_HEIGHT + layout.height + BUTTON_PADDING);
         batch.end();
     }
 
@@ -457,7 +460,7 @@ public class GameScreen extends ScreenAdapter {
         longBoiTexture.dispose();
     }
 
-    // will be called when game ends - allows retry
+    // will be called when game ends
     public void GameOver(boolean playerWon) {
         gameOver = true;
         won = playerWon;

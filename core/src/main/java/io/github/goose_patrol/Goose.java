@@ -172,9 +172,11 @@ public class Goose extends Entity{
     public void setSpeed(float newSpeed) {
         speed = newSpeed;
     }
+
     public void setDamage(float newDamage) {
         damage = newDamage;
     }
+
     public void setMaxFullness(float newMax) {
         maxFullness = newMax;
     }
