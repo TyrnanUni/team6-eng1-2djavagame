@@ -350,41 +350,44 @@ public class GameScreen extends ScreenAdapter {
         drawUI();
 
         // -------- Pause/game-over overlay------//
-        if (paused || gameOver) {
-            Gdx.gl.glEnable(GL20.GL_BLEND);
-            shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-            shapeRenderer.setColor(0f, 0f, 0f, 0.6f);
-            shapeRenderer.rect(0, 0, gameView.getScreenWidth(), gameView.getScreenHeight());
-            shapeRenderer.end();
-            Gdx.gl.glDisable(GL20.GL_BLEND);
-
-            // text
-            batch.begin();
-            if (gameOver) {
-                String title;
-                String message;
-                if (won) {
-                    title = "YOU WIN!";
-                    message = "You survived the geese";
-                } else {
-                    title = "GAME OVER";
-                    message = "The geese caught you " + player.getHits() + " times";
-                }
-                layout.setText(overlayFont, title);
-                overlayFont.draw(batch, layout, XCentre - layout.width/2f, YCentre + layout.height * 2);
-                layout.setText(overlayFont, message);
-                overlayFont.draw(batch, layout, XCentre - layout.width/2f, YCentre);
-                layout.setText(overlayFont, "Press R to play again");
-                overlayFont.draw(batch, layout, XCentre - layout.width/2f, YCentre - layout.height * 2);
-            }
-            else if (paused) {
-                layout.setText(overlayFont, "PAUSED");
-                overlayFont.draw(batch, layout, XCentre - layout.width/2f, YCentre + layout.height);
-                layout.setText(overlayFont, "Press Q or ESC to RESUME..");
-                overlayFont.draw(batch, layout, XCentre - layout.width/2f, YCentre - layout.height);
-            }
-            batch.end();
+        Gdx.gl.glEnable(GL20.GL_BLEND);
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        shapeRenderer.setColor(0f, 0f, 0f, 0.6f);
+        for (Item item : inventory) {
+            shapeRenderer.rect(item.getX(), item.getY(), item.getWidth(), item.getHeight()*(item.cooldownLeft)/ item.COOLDOWN);
         }
+        if (paused || gameOver) {
+            shapeRenderer.rect(0, 0, gameView.getScreenWidth(), gameView.getScreenHeight());
+        }
+        shapeRenderer.end();
+        Gdx.gl.glDisable(GL20.GL_BLEND);
+
+        // text
+        batch.begin();
+        if (gameOver) {
+            String title;
+            String message;
+            if (won) {
+                title = "YOU WIN!";
+                message = "You survived the geese";
+            } else {
+                title = "GAME OVER";
+                message = "The geese caught you " + player.getHits() + " times";
+            }
+            layout.setText(overlayFont, title);
+            overlayFont.draw(batch, layout, XCentre - layout.width/2f, YCentre + layout.height * 2);
+            layout.setText(overlayFont, message);
+            overlayFont.draw(batch, layout, XCentre - layout.width/2f, YCentre);
+            layout.setText(overlayFont, "Press R to play again");
+            overlayFont.draw(batch, layout, XCentre - layout.width/2f, YCentre - layout.height * 2);
+        }
+        else if (paused) {
+            layout.setText(overlayFont, "PAUSED");
+            overlayFont.draw(batch, layout, XCentre - layout.width/2f, YCentre + layout.height);
+            layout.setText(overlayFont, "Press Q or ESC to RESUME..");
+            overlayFont.draw(batch, layout, XCentre - layout.width/2f, YCentre - layout.height);
+        }
+        batch.end();
     }
 
     /**
